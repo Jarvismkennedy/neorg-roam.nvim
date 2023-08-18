@@ -7,7 +7,8 @@ M.reload = function()
     print("reload utils")
     reload("neorg.utils")
     print("reload find_note")
-    reload("telescope._extensions.find_note")
+    reload("telescope._extensions.neorg.find_note")
+    reload("telescope._extensions.neorg")
     print("require neorg")
     require("neorg").setup({
         load = {
