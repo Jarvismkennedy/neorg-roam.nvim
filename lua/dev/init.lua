@@ -4,12 +4,9 @@ M.reload = function()
     print("reloading neorg")
     local reload = require("plenary.reload").reload_module
     reload("neorg")
-    print("reload utils")
-    reload("neorg.utils")
-    print("reload find_note")
+    reload("neorg.modules.core.utils")
     reload("telescope._extensions.neorg.find_note")
     reload("telescope._extensions.neorg")
-    print("require neorg")
     require("neorg").setup({
         load = {
             ["core.defaults"] = {}, -- Loads default behaviour
@@ -19,8 +16,9 @@ M.reload = function()
                     workspaces = {
                         work = "~/Documents/notes/work",
                         personal = "~/Documents/notes/personal",
+                        roam = "~/Documents/notes/roam",
                     },
-                    default_workspace = "work",
+                    default_workspace = "roam",
                 },
             },
             ["core.integrations.roam"] = {},
