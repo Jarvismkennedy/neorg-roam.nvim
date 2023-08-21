@@ -1,6 +1,6 @@
 local M = {}
 
-M.create_capture_window = function()
+M.create_capture_window = function(keymaps)
     local buf = vim.api.nvim_create_buf(true, false)
     vim.print({ buffer = buf })
     vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
@@ -14,13 +14,14 @@ M.create_capture_window = function()
     local col = math.ceil((width - win_width) / 2)
 
     local opts = {
-        style = "minimal",
         relative = "editor",
         width = win_width,
         height = win_height,
         row = row,
         col = col,
         border = "rounded",
+        title = "Cancel capture: " .. keymaps.capture_cancel .. ", Save capture: " .. keymaps.capture_save,
+        title_pos = "center",
     }
 
     local win = vim.api.nvim_open_win(buf, true, opts)

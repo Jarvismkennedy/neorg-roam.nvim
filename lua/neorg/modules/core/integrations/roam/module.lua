@@ -35,6 +35,14 @@ module.load = function()
                 { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
                 { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
             },
+            v = {
+                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
+                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
+            },
+            i = {
+                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
+                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
+            },
         }, { silent = true, noremap = true })
     end)
 
@@ -48,8 +56,8 @@ module.config.public = {
         insert_link = "<leader>nri",
         find_note = "<leader>nrf",
         capture_note = "<leader>nrc",
-        capture_cancel = "<leader>ncc",
-        capture_save = "<leader>ncw",
+        capture_cancel = "<C-q>",
+        capture_save = "<C-w>",
     },
 }
 -- handle events.
@@ -138,7 +146,7 @@ module.public = {
                 choice = selection[1]
                 metadata = "Neorg update-metadata"
             end
-            local buf_win = utils.create_capture_window()
+            local buf_win = utils.create_capture_window(module.config.public.keymaps)
             local buf = buf_win[1]
             module.required["core.mode"].set_mode("roam_capture")
             vim.api.nvim_buf_call(buf, function()
@@ -169,6 +177,7 @@ module.public = {
         end)
 
         module.private.capture_buffer = nil
+        vim.api.nvim_input("<esc>")
     end,
     capture_cancel = function()
         if module.private.capture_buffer == nil then
@@ -179,6 +188,7 @@ module.public = {
             vim.cmd("bd! " .. module.private.capture_buffer)
         end)
         module.private.capture_buffer = nil
+        vim.api.nvim_input("<esc>")
     end,
     --
 

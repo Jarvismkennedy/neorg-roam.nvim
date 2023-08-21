@@ -1,0 +1,49 @@
+* Neorg Roam
+  - Trying to do some of the things that org-roam does.
+
+
+** Install
+   Install with packer
+   @code lua 
+   use({"jarvismkennedy/neorgroam.nvim", 
+	   requires = { 
+		   "nvim-telescope/telescope.nvim", 
+		   "nvim-lua/plenary.nvim"
+	   }
+   })
+   @end
+   And then set it up as a neorg module.
+   @code lua
+require("neorg").setup({ 
+	load = { 
+		["core.defaults"] = {},
+		["core.dirman"] = {
+			config = { 
+				workspaces = { 
+					notes = "~/Documents/neorg/notes"
+					roam = "~/Documents/neorg/roam"
+				}
+				default_workspace = "roam"
+			}
+		},
+		["core.integrations.roam"] = { 
+			-- default keymaps
+			keymaps={
+				select_prompt = "<C-n>",
+				insert_file_link = "<leader>nri",
+				find_note = "<leader>nrf",
+				capture_note="<leader>nrc"
+				capture_cancel="<C-q>",
+				capture_save="C-w"
+			}
+		}
+	}
+})
+   @end
+ 
+
+** currently implemented features
+   - Find notes.
+   - Insert links to files.
+   - Capture notes.
+   - Search back links. 
