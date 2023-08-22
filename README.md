@@ -53,3 +53,9 @@ keymaps = {
 - Insert links to files.
 - Capture notes. 
 - Capture to the index file.
+
+
+## TODO:
+
+-  Create sql module
+-  Implement back links
