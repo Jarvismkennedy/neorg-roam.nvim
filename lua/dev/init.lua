@@ -5,8 +5,6 @@ M.reload = function()
     local reload = require("plenary.reload").reload_module
     reload("neorg")
     reload("neorg.modules.core.utils")
-    reload("telescope._extensions.neorg.find_note")
-    reload("telescope._extensions.neorg")
     require("neorg").setup({
         load = {
             ["core.defaults"] = {}, -- Loads default behaviour
