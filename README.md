@@ -57,5 +57,7 @@ require("neorg").setup({
 
 ## TODO:
 
--  Create sql module
--  Implement back links
+-  Create sql module.
+-  Implement back links.
+-  Read metadata to get title for links.
+-  Implement other types of linkables.

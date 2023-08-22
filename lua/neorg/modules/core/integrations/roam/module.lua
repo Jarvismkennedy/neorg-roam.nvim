@@ -341,13 +341,11 @@ module.private = {
         module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
     end,
     capture_link = function(file, link)
-        vim.print("CAPTURE_LINK_CALLED")
         local buf = vim.api.nvim_get_current_buf()
         local win = vim.api.nvim_get_current_win()
         local pos = vim.api.nvim_win_get_cursor(win)
         -- save the buffer and cursor position to insert link on save
         module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2], link = link }
-        vim.print(module.private.capture_link_buffer)
         local buf_win = utils.create_capture_window()
         local link_buf = buf_win[1]
         module.required["core.mode"].set_mode("roam_capture_link")
@@ -355,7 +353,6 @@ module.private = {
         if vim.fn.filereadable(file) == 1 then
             metadata = "Neorg update-metadata"
         end
-        vim.print({ read = vim.fn.filereadable(file), meta = metadata })
         vim.api.nvim_buf_call(link_buf, function()
             -- edit the choice in the capture window, update/inject metadata, jump to bottom
             -- of file, and enter a new line.
@@ -368,13 +365,11 @@ module.private = {
         module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
     end,
     capture_link_save = function()
-        vim.print("capture_link_save_called")
         module.public.capture_save()
         local capture_link = module.private.capture_link_buffer
         if capture_link == nil then
             error("Failed to insert link properly: capture_link_buffer is nil")
         end
-        vim.print(capture_link)
         vim.api.nvim_set_current_buf(capture_link.id)
         vim.cmd(string.format(":call cursor(%d,%d)", capture_link.row, capture_link.col))
         vim.api.nvim_put({ capture_link.link }, "c", true, true)
@@ -448,7 +443,6 @@ module.public = {
             error("Capture buffer is nil")
         end
         module.required["core.mode"].set_previous_mode()
-        vim.print(module.private)
         vim.api.nvim_buf_call(module.private.capture_buffer, function()
             vim.cmd("w")
             vim.cmd("bd " .. module.private.capture_buffer)
@@ -482,11 +476,11 @@ module.public = {
             end
             local link = ""
             if file == nil then
-                link = "{:" .. prompt .. ":}"
+                link = "{:" .. prompt .. ":}[" .. prompt .. "]"
                 module.private.capture_link(curr_wksp[2] .. "/" .. prompt .. ".norg", link)
             else
                 local start_index = #curr_wksp[2] + 2
-                link = "{:" .. file[1]:sub(start_index, -6) .. ":}[" .. "GET TITLE HERE" .. "]"
+                link = "{:" .. file[1]:sub(start_index, -6) .. ":}[" .. file[1]:sub(start_index, -6) .. "]"
                 vim.api.nvim_put({ link }, "c", true, true)
             end
         end
