@@ -10,15 +10,21 @@ M.reload = function()
     require("neorg").setup({
         load = {
             ["core.defaults"] = {}, -- Loads default behaviour
-            ["core.concealer"] = {}, -- Adds pretty icons to your documents
+            ["core.concealer"] = {
+                config = {
+                    icon_preset = "varied",
+                },
+            }, -- Adds pretty icons to your documents
+            ["core.export"] = {},
             ["core.dirman"] = { -- Manages Neorg workspaces
                 config = {
                     workspaces = {
                         work = "~/Documents/notes/work",
                         personal = "~/Documents/notes/personal",
                         roam = "~/Documents/notes/roam",
+                        plugin_dev = "~/Documents/notes/plugin_dev",
                     },
-                    default_workspace = "roam",
+                    default_workspace = "plugin_dev",
                 },
             },
             ["core.integrations.roam"] = {},

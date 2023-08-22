@@ -1,6 +1,6 @@
 local M = {}
 
-M.create_capture_window = function(keymaps)
+M.create_capture_window = function()
     local buf = vim.api.nvim_create_buf(true, false)
     vim.print({ buffer = buf })
     vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
@@ -12,6 +12,8 @@ M.create_capture_window = function(keymaps)
 
     local row = math.ceil((height - win_height) / 2 - 1)
     local col = math.ceil((width - win_width) / 2)
+
+    local keymaps = require("neorg.modules.core.integrations.roam.module").config.public.keymaps
 
     local opts = {
         relative = "editor",
@@ -27,7 +29,8 @@ M.create_capture_window = function(keymaps)
     local win = vim.api.nvim_open_win(buf, true, opts)
     return { buf, win }
 end
-M.generate_picker = function(files, curr_wksp)
+
+M.generate_picker = function(files, curr_wksp, title)
     local pickers = require("telescope.pickers")
     local finders = require("telescope.finders")
     local sorter = require("telescope.sorters")
@@ -37,7 +40,7 @@ M.generate_picker = function(files, curr_wksp)
     return function(action)
         opts = opts or {}
         return pickers.new(opts, {
-            prompt_title = "colors",
+            prompt_title = title,
             attach_mappings = function(prompt_bufnr, map)
                 actions.select_default:replace(function()
                     local current_picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
@@ -54,11 +57,15 @@ M.generate_picker = function(files, curr_wksp)
                         local current_picker = require("telescope.actions.state").get_current_picker(prompt_bufnr)
                         local prompt = current_picker:_get_prompt()
                         actions.close(prompt_bufnr)
+                        if prompt == nil or prompt == "" then
+                            error("Cant create new from an empty prompt.")
+                        end
                         action(prompt, nil)
                     end
                 )
                 return true
             end,
+            previewer = require("telescope.previewers").vim_buffer_cat:new(),
             sorter = sorter.get_fzy_sorter(opts),
             finder = finders.new_table({
                 results = files,

@@ -1,7 +1,5 @@
 * Neorg Roam
   - Trying to do some of the things that org-roam does.
-
-
 ** Install
    Install with packer
    @code lua 
@@ -28,14 +26,17 @@ require("neorg").setup({
 		},
 		["core.integrations.roam"] = { 
 			-- default keymaps
-			keymaps={
+			keymaps = {
+				-- select_prompt is used to to create new note / capture from the prompt directly
+				-- instead of the telescope choice.
 				select_prompt = "<C-n>",
-				insert_file_link = "<leader>nri",
-				find_note = "<leader>nrf",
-				capture_note="<leader>nrc"
-				capture_cancel="<C-q>",
-				capture_save="C-w"
-			}
+				insert_link = "<leader>ni",
+				find_note = "<leader>nf",
+				capture_note = "<leader>nc",
+				capture_index = "<leader>nci",
+				capture_cancel = "<C-q>",
+				capture_save = "<C-w>",
+			},
 		}
 	}
 })
@@ -45,5 +46,5 @@ require("neorg").setup({
 ** currently implemented features
    - Find notes.
    - Insert links to files.
-   - Capture notes.
-   - Search back links. 
+   - Capture notes. 
+   - Capture to the index file.
