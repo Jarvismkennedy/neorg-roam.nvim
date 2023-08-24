@@ -325,20 +325,27 @@ module.private = {
         local buf_win = utils.create_capture_window()
         local buf = buf_win[1]
         module.required["core.mode"].set_mode("roam_capture")
-        local metadata = "Neorg inject-metadata"
-        if vim.fn.filereadable(file) == 1 then
-            metadata = "Neorg update-metadata"
-        end
+
         vim.api.nvim_buf_call(buf, function()
             -- edit the choice in the capture window, update/inject metadata, jump to bottom
             -- of file, and enter a new line.
             vim.cmd("e " .. file)
-            vim.cmd(metadata)
-            vim.cmd("$")
-            vim.cmd("normal g_")
-            vim.cmd("normal a")
+            module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
+            -- put cursor at the end of metadata.
+            local metadata_present =
+                module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
+
+            if metadata_present then
+                vim.cmd("Neorg update-metadata")
+            else
+                vim.cmd("Neorg inject-metadata")
+            end
+            -- search for the end of the metadata tag.
+            local row_of_meta_end = vim.fn.search("@end")
+            vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
+            vim.cmd(":normal o")
         end)
-        module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
+        vim.print(module.private.capture_buffer)
     end,
     capture_link = function(file, link)
         local buf = vim.api.nvim_get_current_buf()
@@ -349,18 +356,24 @@ module.private = {
         local buf_win = utils.create_capture_window()
         local link_buf = buf_win[1]
         module.required["core.mode"].set_mode("roam_capture_link")
-        local metadata = "Neorg inject-metadata"
-        if vim.fn.filereadable(file) == 1 then
-            metadata = "Neorg update-metadata"
-        end
-        vim.api.nvim_buf_call(link_buf, function()
+        vim.api.nvim_buf_call(buf, function()
             -- edit the choice in the capture window, update/inject metadata, jump to bottom
             -- of file, and enter a new line.
             vim.cmd("e " .. file)
-            vim.cmd(metadata)
-            vim.cmd("$")
-            vim.cmd("normal g_")
-            vim.cmd("normal a")
+            module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
+            -- put cursor at the end of metadata.
+            local metadata_present =
+                module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
+
+            if metadata_present then
+                vim.cmd("Neorg update-metadata")
+            else
+                vim.cmd("Neorg inject-metadata")
+            end
+            -- search for the end of the metadata tag.
+            local row_of_meta_end = vim.fn.search("@end")
+            vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
+            vim.cmd(":normal o")
         end)
         module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
     end,
@@ -491,5 +504,5 @@ module.public = {
     db_sync_workspace = function(wksp) end,
 }
 
---vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")
+vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")
 return module

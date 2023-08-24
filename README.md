@@ -2,6 +2,8 @@
 
 - Trying to do some of the things that org-roam does.
 
+**This plugin is a work in progress and has bugs still**
+
 ## Install
 
 Install with packer
