@@ -9,16 +9,11 @@ module.setup = function()
             "core.keybinds",
             "core.dirman",
             "core.esupports.metagen",
-            "core.mode",
         },
     }
 end
 
 module.load = function()
-    -- register modes
-    module.required["core.mode"].add_mode("roam_capture")
-    module.required["core.mode"].add_mode("roam_capture_link")
-
     -- register keybinds
     local keybinds = module.required["core.keybinds"]
     keybinds.register_keybinds(module.name, {
@@ -80,8 +75,51 @@ module.events.subscribed = {
 }
 
 module.private = {
-    register_buffer_for_keymaps = function(buf)
-        vim.api.nvim_buf_set_keymap(buf, "n", module.config.public.keymaps.capture_note, module.public.capture_save)
+    register_buffer_for_capture_keymaps = function(buf)
+        vim.keymap.set("n", module.config.public.keymaps.capture_save, module.public.capture_save, { buffer = buf })
+        vim.keymap.set("n", module.config.public.keymaps.capture_cancel, module.public.capture_cancel, { buffer = buf })
+        vim.keymap.set("v", module.config.public.keymaps.capture_save, module.public.capture_save, { buffer = buf })
+        vim.keymap.set("v", module.config.public.keymaps.capture_cancel, module.public.capture_cancel, { buffer = buf })
+        vim.keymap.set("i", module.config.public.keymaps.capture_save, module.public.capture_save, { buffer = buf })
+        vim.keymap.set("i", module.config.public.keymaps.capture_cancel, module.public.capture_cancel, { buffer = buf })
+    end,
+    register_buffer_for_capture_link_keymaps = function(buf)
+        vim.keymap.set(
+            "n",
+            module.config.public.keymaps.capture_save,
+            module.public.capture_link_save,
+            { buffer = buf }
+        )
+        vim.keymap.set(
+            "n",
+            module.config.public.keymaps.capture_cancel,
+            module.public.capture_link_cancel,
+            { buffer = buf }
+        )
+        vim.keymap.set(
+            "v",
+            module.config.public.keymaps.capture_save,
+            module.public.capture_link_save,
+            { buffer = buf }
+        )
+        vim.keymap.set(
+            "v",
+            module.config.public.keymaps.capture_cancel,
+            module.public.capture_link_cancel,
+            { buffer = buf }
+        )
+        vim.keymap.set(
+            "i",
+            module.config.public.keymaps.capture_save,
+            module.public.capture_link_save,
+            { buffer = buf }
+        )
+        vim.keymap.set(
+            "i",
+            module.config.public.keymaps.capture_cancel,
+            module.public.capture_link_cancel,
+            { buffer = buf }
+        )
     end,
     get_files = function()
         local dirman = module.required["core.dirman"]
@@ -96,8 +134,6 @@ module.private = {
     capture_note = function(file)
         local buf_win = utils.create_capture_window()
         local buf = buf_win[1]
-        module.required["core.mode"].set_mode("roam_capture")
-
         vim.api.nvim_buf_call(buf, function()
             -- edit the choice in the capture window, update/inject metadata, jump to bottom
             -- of file, and enter a new line.
@@ -118,8 +154,7 @@ module.private = {
             vim.cmd(":normal o")
             vim.cmd(":normal o")
         end)
-        vim.api.nvim_win_set_var(buf_win[2], "capture_window", true)
-        vim.api.nvim_buf_set_keymap()
+        module.private.register_buffer_for_capture_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
     end,
     capture_link = function(file, link)
         local buf = vim.api.nvim_get_current_buf()
@@ -128,13 +163,10 @@ module.private = {
         -- save the buffer and cursor position to insert link on save
         module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2], link = link }
         local buf_win = utils.create_capture_window()
-        local link_buf = buf_win[1]
-        module.required["core.mode"].set_mode("roam_capture_link")
-        vim.api.nvim_buf_call(buf, function()
+        vim.api.nvim_buf_call(buf_win[1], function()
             -- edit the choice in the capture window, update/inject metadata, jump to bottom
             -- of file, and enter a new line.
             vim.cmd("e " .. file)
-            module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
             -- put cursor at the end of metadata.
             local metadata_present =
                 module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
@@ -148,22 +180,9 @@ module.private = {
             local row_of_meta_end = vim.fn.search("@end")
             vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
             vim.cmd(":normal o")
+            vim.cmd(":normal o")
         end)
-        module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
-    end,
-    capture_link_save = function()
-        module.public.capture_save()
-        local capture_link = module.private.capture_link_buffer
-        if capture_link == nil then
-            error("Failed to insert link properly: capture_link_buffer is nil")
-        end
-        vim.api.nvim_set_current_buf(capture_link.id)
-        vim.cmd(string.format(":call cursor(%d,%d)", capture_link.row, capture_link.col))
-        vim.api.nvim_put({ capture_link.link }, "c", true, true)
-    end,
-    capture_link_cancel = function()
-        module.private.capture_link_buffer = nil
-        module.public.capture_cancel()
+        module.private.register_buffer_for_capture_link_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
     end,
 }
 module.public = {
@@ -180,12 +199,16 @@ module.public = {
             end
             if selection == nil then
                 choice = curr_wksp[2] .. "/" .. prompt .. ".norg"
-                vim.cmd("e " .. choice)
-                vim.cmd("Neorg inject-metadata")
             else
                 choice = selection[1]
-                vim.cmd("e " .. choice)
+            end
+            vim.cmd("e " .. choice)
+            local buf = vim.api.nvim_get_current_buf()
+            local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
+            if metadata_present then
                 vim.cmd("Neorg update-metadata")
+            else
+                vim.cmd("Neorg inject-metadata")
             end
         end
         if picker == nil then
@@ -204,7 +227,6 @@ module.public = {
         local picker = utils.generate_picker(files, curr_wksp, title)
         local action = function(prompt, selection)
             local choice = nil
-            local metadata = nil
             if selection == nil and prompt == nil then
                 return
             end
@@ -226,21 +248,31 @@ module.public = {
     end,
     -- capture to workspace index.
     capture_save = function()
-        if vim.api.nvim_win_get_var(0, "capture_window") then
-            vim.api.nvim_buf_call(0, function()
-                vim.cmd("w")
-                vim.cmd("bd")
-            end)
-            vim.api.nvim_input("<esc>")
-        end
+        vim.api.nvim_buf_call(0, function()
+            vim.cmd("w")
+            vim.cmd("bd")
+        end)
+        vim.api.nvim_input("<esc>")
     end,
     capture_cancel = function()
-        if vim.api.nvim_win_get_var(0, "capture_window") then
-            vim.api.nvim_buf_call(0, function()
-                vim.cmd("bd!")
-            end)
-            vim.api.nvim_input("<esc>")
+        vim.api.nvim_buf_call(0, function()
+            vim.cmd("bd!")
+        end)
+        vim.api.nvim_input("<esc>")
+    end,
+    capture_link_save = function()
+        module.public.capture_save()
+        local capture_link = module.private.capture_link_buffer
+        if capture_link == nil then
+            error("Failed to insert link properly: capture_link_buffer is nil")
         end
+        vim.api.nvim_set_current_buf(capture_link.id)
+        vim.cmd(string.format(":call cursor(%d,%d)", capture_link.row, capture_link.col))
+        vim.api.nvim_put({ capture_link.link }, "c", true, true)
+    end,
+    capture_link_cancel = function()
+        module.private.capture_link_buffer = nil
+        module.public.capture_cancel()
     end,
     --
 
