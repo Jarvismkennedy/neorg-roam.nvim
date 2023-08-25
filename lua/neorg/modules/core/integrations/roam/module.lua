@@ -39,215 +39,6 @@ module.load = function()
                 { module.config.public.keymaps.insert_link, "core.integrations.roam.insert_link" },
             },
         }, { silent = true, noremap = true })
-        keybinds.map_event_to_mode("roam_capture", {
-            n = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
-            },
-            v = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
-            },
-            i = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_cancel" },
-            },
-        }, { silent = true, noremap = true })
-        keybinds.map_event_to_mode("roam_capture_link", {
-            n = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_link_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_link_cancel" },
-            },
-            v = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_link_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_link_cancel" },
-            },
-            i = {
-                { module.config.public.keymaps.capture_save, "core.integrations.roam.capture_link_save" },
-                { module.config.public.keymaps.capture_cancel, "core.integrations.roam.capture_link_cancel" },
-            },
-        }, { silent = true, noremap = true })
-
-        -- add all the default keybinds back in. Theres got to be a better way to do this rather
-        -- than copy pasta from neorg source code..............................
-        --
-        keybinds.map_event_to_mode("roam_capture", {
-            n = {
-                -- Marks the task under the cursor as "undone"
-                -- ^mark Task as Undone
-                { "<leader>" .. "tu", "core.qol.todo_items.todo.task_undone", opts = { desc = "Mark as Undone" } },
-                -- Marks the task under the cursor as "pending"
-                -- ^mark Task as Pending
-                { "<leader>" .. "tp", "core.qol.todo_items.todo.task_pending", opts = { desc = "Mark as Pending" } },
-
-                -- Marks the task under the cursor as "done"
-                -- ^mark Task as Done
-                { "<leader>" .. "td", "core.qol.todo_items.todo.task_done", opts = { desc = "Mark as Done" } },
-
-                -- Marks the task under the cursor as "on_hold"
-                -- ^mark Task as on Hold
-                { "<leader>" .. "th", "core.qol.todo_items.todo.task_on_hold", opts = { desc = "Mark as On Hold" } },
-
-                -- Marks the task under the cursor as "cancelled"
-                -- ^mark Task as Cancelled
-                {
-                    "<leader>" .. "tc",
-                    "core.qol.todo_items.todo.task_cancelled",
-                    opts = { desc = "Mark as Cancelled" },
-                },
-
-                -- Marks the task under the cursor as "recurring"
-                -- ^mark Task as Recurring
-                {
-                    "<leader>" .. "tr",
-                    "core.qol.todo_items.todo.task_recurring",
-                    opts = { desc = "Mark as Recurring" },
-                },
-
-                -- Marks the task under the cursor as "important"
-                -- ^mark Task as Important
-                {
-                    "<leader>" .. "ti",
-                    "core.qol.todo_items.todo.task_important",
-                    opts = { desc = "Mark as Important" },
-                },
-
-                -- Marks the task under the cursor as "ambiguous"
-                -- ^mark Task as ambiguous
-                { "<leader>" .. "ta", "core.qol.todo_items.todo.task_ambiguous", opts = { desc = "Mark as Ambigous" } },
-
-                -- Switches the task under the cursor between a select few states
-                { "<C-Space>", "core.qol.todo_items.todo.task_cycle", opts = { desc = "Cycle Task" } },
-
-                -- Creates a new .norg file to take notes in
-                -- ^New Note
-                { "<leader>" .. "nn", "core.dirman.new.note", opts = { desc = "Create New Note" } },
-
-                -- Hop to the destination of the link under the cursor
-                { "<CR>", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gd", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gf", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gF", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-
-                -- Same as `<CR>`, except opens the destination in a vertical split
-                {
-                    "<M-CR>",
-                    "core.esupports.hop.hop-link",
-                    "vsplit",
-                    opts = { desc = "Jump to Link (Vertical Split)" },
-                },
-
-                { ">.", "core.promo.promote", opts = { desc = "Promote Object (Non-Recursively)" } },
-                { "<,", "core.promo.demote", opts = { desc = "Demote Object (Non-Recursively)" } },
-
-                { ">>", "core.promo.promote", "nested", opts = { desc = "Promote Object (Recursively)" } },
-                { "<<", "core.promo.demote", "nested", opts = { desc = "Demote Object (Recursively)" } },
-
-                { "<leader>" .. "lt", "core.pivot.toggle-list-type", opts = { desc = "Toggle (Un)ordered List" } },
-                { "<leader>" .. "li", "core.pivot.invert-list-type", opts = { desc = "Invert (Un)ordered List" } },
-
-                { "<leader>" .. "id", "core.tempus.insert-date", opts = { desc = "Insert Date" } },
-            },
-
-            i = {
-                { "<C-t>", "core.promo.promote", opts = { desc = "Promote Object (Recursively)" } },
-                { "<C-d>", "core.promo.demote", opts = { desc = "Demote Object (Recursively)" } },
-                { "<M-CR>", "core.itero.next-iteration", "<CR>", opts = { desc = "Continue Object" } },
-                { "<M-d>", "core.tempus.insert-date-insert-mode", opts = { desc = "Insert Date" } },
-            },
-        }, {
-            silent = true,
-            noremap = true,
-        })
-        keybinds.map_event_to_mode("roam_capture_link", {
-            n = {
-                -- Marks the task under the cursor as "undone"
-                -- ^mark Task as Undone
-                { "<leader>" .. "tu", "core.qol.todo_items.todo.task_undone", opts = { desc = "Mark as Undone" } },
-
-                -- Marks the task under the cursor as "pending"
-                -- ^mark Task as Pending
-                { "<leader>" .. "tp", "core.qol.todo_items.todo.task_pending", opts = { desc = "Mark as Pending" } },
-
-                -- Marks the task under the cursor as "done"
-                -- ^mark Task as Done
-                { "<leader>" .. "td", "core.qol.todo_items.todo.task_done", opts = { desc = "Mark as Done" } },
-
-                -- Marks the task under the cursor as "on_hold"
-                -- ^mark Task as on Hold
-                { "<leader>" .. "th", "core.qol.todo_items.todo.task_on_hold", opts = { desc = "Mark as On Hold" } },
-
-                -- Marks the task under the cursor as "cancelled"
-                -- ^mark Task as Cancelled
-                {
-                    "<leader>" .. "tc",
-                    "core.qol.todo_items.todo.task_cancelled",
-                    opts = { desc = "Mark as Cancelled" },
-                },
-
-                -- Marks the task under the cursor as "recurring"
-                -- ^mark Task as Recurring
-                {
-                    "<leader>" .. "tr",
-                    "core.qol.todo_items.todo.task_recurring",
-                    opts = { desc = "Mark as Recurring" },
-                },
-
-                -- Marks the task under the cursor as "important"
-                -- ^mark Task as Important
-                {
-                    "<leader>" .. "ti",
-                    "core.qol.todo_items.todo.task_important",
-                    opts = { desc = "Mark as Important" },
-                },
-
-                -- Marks the task under the cursor as "ambiguous"
-                -- ^mark Task as ambiguous
-                { "<leader>" .. "ta", "core.qol.todo_items.todo.task_ambiguous", opts = { desc = "Mark as Ambigous" } },
-
-                -- Switches the task under the cursor between a select few states
-                { "<C-Space>", "core.qol.todo_items.todo.task_cycle", opts = { desc = "Cycle Task" } },
-
-                -- Creates a new .norg file to take notes in
-                -- ^New Note
-                { "<leader>" .. "nn", "core.dirman.new.note", opts = { desc = "Create New Note" } },
-
-                -- Hop to the destination of the link under the cursor
-                { "<CR>", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gd", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gf", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-                { "gF", "core.esupports.hop.hop-link", opts = { desc = "Jump to Link" } },
-
-                -- Same as `<CR>`, except opens the destination in a vertical split
-                {
-                    "<M-CR>",
-                    "core.esupports.hop.hop-link",
-                    "vsplit",
-                    opts = { desc = "Jump to Link (Vertical Split)" },
-                },
-
-                { ">.", "core.promo.promote", opts = { desc = "Promote Object (Non-Recursively)" } },
-                { "<,", "core.promo.demote", opts = { desc = "Demote Object (Non-Recursively)" } },
-
-                { ">>", "core.promo.promote", "nested", opts = { desc = "Promote Object (Recursively)" } },
-                { "<<", "core.promo.demote", "nested", opts = { desc = "Demote Object (Recursively)" } },
-
-                { "<leader>" .. "lt", "core.pivot.toggle-list-type", opts = { desc = "Toggle (Un)ordered List" } },
-                { "<leader>" .. "li", "core.pivot.invert-list-type", opts = { desc = "Invert (Un)ordered List" } },
-
-                { "<leader>" .. "id", "core.tempus.insert-date", opts = { desc = "Insert Date" } },
-            },
-
-            i = {
-                { "<C-t>", "core.promo.promote", opts = { desc = "Promote Object (Recursively)" } },
-                { "<C-d>", "core.promo.demote", opts = { desc = "Demote Object (Recursively)" } },
-                { "<M-CR>", "core.itero.next-iteration", "<CR>", opts = { desc = "Continue Object" } },
-                { "<M-d>", "core.tempus.insert-date-insert-mode", opts = { desc = "Insert Date" } },
-            },
-        }, {
-            silent = true,
-            noremap = true,
-        })
     end)
 
     -- set the keybind for pulling up the telescope find note
@@ -270,10 +61,6 @@ module.config.public = {
 module.on_event = function(event)
     local event_handlers = {
         ["core.integrations.roam.insert_link"] = module.public.insert_link,
-        ["core.integrations.roam.capture_save"] = module.public.capture_save,
-        ["core.integrations.roam.capture_cancel"] = module.public.capture_cancel,
-        ["core.integrations.roam.capture_link_save"] = module.private.capture_link_save,
-        ["core.integrations.roam.capture_link_cancel"] = module.private.capture_link_cancel,
     }
     if event.split_type[1] == "core.keybinds" then
         local handler = event_handlers[event.split_type[2]]
@@ -289,16 +76,13 @@ end
 module.events.subscribed = {
     ["core.keybinds"] = {
         ["core.integrations.roam.insert_link"] = true,
-        ["core.integrations.roam.capture_save"] = true,
-        ["core.integrations.roam.capture_cancel"] = true,
-        ["core.integrations.roam.capture_link_cancel"] = true,
-        ["core.integrations.roam.capture_link_save"] = true,
     },
 }
 
 module.private = {
-    capture_buffer = nil,
-    capture_link_buffer = nil,
+    register_buffer_for_keymaps = function(buf)
+        vim.api.nvim_buf_set_keymap(buf, "n", module.config.public.keymaps.capture_note, module.public.capture_save)
+    end,
     get_files = function()
         local dirman = module.required["core.dirman"]
         if dirman == nil then
@@ -332,8 +116,10 @@ module.private = {
             local row_of_meta_end = vim.fn.search("@end")
             vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
             vim.cmd(":normal o")
+            vim.cmd(":normal o")
         end)
-        vim.print(module.private.capture_buffer)
+        vim.api.nvim_win_set_var(buf_win[2], "capture_window", true)
+        vim.api.nvim_buf_set_keymap()
     end,
     capture_link = function(file, link)
         local buf = vim.api.nvim_get_current_buf()
@@ -440,28 +226,21 @@ module.public = {
     end,
     -- capture to workspace index.
     capture_save = function()
-        if module.private.capture_buffer == nil then
-            error("Capture buffer is nil")
+        if vim.api.nvim_win_get_var(0, "capture_window") then
+            vim.api.nvim_buf_call(0, function()
+                vim.cmd("w")
+                vim.cmd("bd")
+            end)
+            vim.api.nvim_input("<esc>")
         end
-        module.required["core.mode"].set_previous_mode()
-        vim.api.nvim_buf_call(module.private.capture_buffer, function()
-            vim.cmd("w")
-            vim.cmd("bd " .. module.private.capture_buffer)
-        end)
-
-        module.private.capture_buffer = nil
-        vim.api.nvim_input("<esc>")
     end,
     capture_cancel = function()
-        if module.private.capture_buffer == nil then
-            error("Capture buffer is nil")
+        if vim.api.nvim_win_get_var(0, "capture_window") then
+            vim.api.nvim_buf_call(0, function()
+                vim.cmd("bd!")
+            end)
+            vim.api.nvim_input("<esc>")
         end
-        module.required["core.mode"].set_previous_mode()
-        vim.api.nvim_buf_call(module.private.capture_buffer, function()
-            vim.cmd("bd! " .. module.private.capture_buffer)
-        end)
-        module.private.capture_buffer = nil
-        vim.api.nvim_input("<esc>")
     end,
     --
 
