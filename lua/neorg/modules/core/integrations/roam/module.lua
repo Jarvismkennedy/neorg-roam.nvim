@@ -155,12 +155,6 @@ module.load = function()
                 { "<M-CR>", "core.itero.next-iteration", "<CR>", opts = { desc = "Continue Object" } },
                 { "<M-d>", "core.tempus.insert-date-insert-mode", opts = { desc = "Insert Date" } },
             },
-
-            -- TODO: Readd these
-            -- v = {
-            --     { ">>", ":<cr><cmd>Neorg keybind all core.promo.promote_range<cr>" },
-            --     { "<<", ":<cr><cmd>Neorg keybind all core.promo.demote_range<cr>" },
-            -- },
         }, {
             silent = true,
             noremap = true,
@@ -250,12 +244,6 @@ module.load = function()
                 { "<M-CR>", "core.itero.next-iteration", "<CR>", opts = { desc = "Continue Object" } },
                 { "<M-d>", "core.tempus.insert-date-insert-mode", opts = { desc = "Insert Date" } },
             },
-
-            -- TODO: Readd these
-            -- v = {
-            --     { ">>", ":<cr><cmd>Neorg keybind all core.promo.promote_range<cr>" },
-            --     { "<<", ":<cr><cmd>Neorg keybind all core.promo.demote_range<cr>" },
-            -- },
         }, {
             silent = true,
             noremap = true,
