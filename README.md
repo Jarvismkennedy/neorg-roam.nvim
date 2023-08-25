@@ -2,8 +2,6 @@
 
 - Trying to do some of the things that org-roam does.
 
-**This plugin is a work in progress and has bugs still**
-
 ## Install
 
 Install with packer
@@ -52,7 +50,7 @@ require("neorg").setup({
 ## currently implemented features
 
 - Find notes.
-- Insert links to files.
+- Insert links to norg files.
 - Capture notes. 
 - Capture to the index file.
 
@@ -61,4 +59,5 @@ require("neorg").setup({
 
 -  Create sql module.
 -  Implement back links.
--  Implement other types of linkables.
+-  Implement capture templates.
+-  Other types of linkables.

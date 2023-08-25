@@ -45,10 +45,12 @@
 
 ** currently implemented features
    - Find notes.
-   - Insert links to files.
+   - Insert links to norg files.
    - Capture notes. 
    - Capture to the index file.
 
 ** TODO:
-   - ( ) Create sql module
-   - ( ) Implement back links
+   - ( ) Create sql module.
+   - ( ) Implement back links.
+   - ( ) Implement capture templates.
+   - ( ) Other types of linkables.
