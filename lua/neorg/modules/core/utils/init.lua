@@ -33,13 +33,12 @@ end
 M.generate_picker = function(files, curr_wksp, title)
     local pickers = require("telescope.pickers")
     local finders = require("telescope.finders")
-    local sorter = require("telescope.sorters")
     local make_entry = require("telescope.make_entry")
     local actions = require("telescope.actions")
     local action_state = require("telescope.actions.state")
+    local conf = require("telescope.config").values
     return function(action)
-        opts = opts or {}
-        return pickers.new(opts, {
+        return pickers.new({}, {
             prompt_title = title,
             attach_mappings = function(prompt_bufnr, map)
                 actions.select_default:replace(function()
@@ -65,8 +64,8 @@ M.generate_picker = function(files, curr_wksp, title)
                 )
                 return true
             end,
-            previewer = require("telescope.previewers").vim_buffer_cat:new(),
-            sorter = sorter.get_fzy_sorter(opts),
+            previewer = conf.file_previewer({}),
+            sorter = conf.file_sorter({}),
             finder = finders.new_table({
                 results = files,
                 entry_maker = make_entry.gen_from_file({ cwd = curr_wksp[2] }),

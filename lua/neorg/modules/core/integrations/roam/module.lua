@@ -17,13 +17,7 @@ module.load = function()
     -- register keybinds
     local keybinds = module.required["core.keybinds"]
     keybinds.register_keybinds(module.name, {
-        "find_note",
         "insert_link",
-        "capture_cancel",
-        "capture_save",
-        "capture_link_save",
-        "capture_link_cancel",
-        "capture_index",
     })
 
     -- define the keybindings
