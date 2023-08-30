@@ -1,5 +1,5 @@
 @document.meta
-title: todo
+title: Dev notes.
 description: 
 authors: jarviskennedy
 categories: 
@@ -9,7 +9,8 @@ version: 1.1.1
 @end
 
 * To Dos
-  - ( ) Separate capture logic into its on module.
+  - (x) Separate capture logic into its on module.
+  - ( ) Refactor the picker logic. 
   - ( ) Separate find logic into its own module.
   - ( ) Add workspace keymaps, i.e. Capture to workspace, find note in workspace, etc. Just add `w`
 	after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace

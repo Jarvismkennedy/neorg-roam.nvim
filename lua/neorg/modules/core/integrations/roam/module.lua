@@ -44,7 +44,7 @@ module.load = function()
         }, { silent = true, noremap = true })
     end)
 
-    -- set the keybind for pulling up the telescope find note
+    -- set the keybind for pulling up telescope
     vim.keymap.set("n", module.config.public.keymaps.find_note, module.public.find_note)
     vim.keymap.set("n", module.config.public.keymaps.capture_note, module.public.capture_note)
     vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
@@ -115,9 +115,6 @@ module.public = {
         end
         picker(action):find()
     end,
-
-    -- captures
-    -- select a note to capture to.
     capture_note = function()
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
@@ -145,7 +142,6 @@ module.public = {
         local curr_wksp = module.required["core.dirman"].get_current_workspace()[2]
         module.required["core.integrations.roam.capture"].capture_note(curr_wksp .. "/index.norg")
     end,
-
     insert_link = function()
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]

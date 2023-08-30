@@ -99,13 +99,10 @@ module.public = {
         module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2], link = link }
         local buf_win = utils.create_capture_window()
         vim.api.nvim_buf_call(buf_win[1], function()
-            -- edit the choice in the capture window, update/inject metadata, jump to bottom
-            -- of file, and enter a new line.
             vim.cmd("e " .. file)
             -- put cursor at the end of metadata.
             local metadata_present =
                 module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
-
             if metadata_present then
                 vim.cmd("Neorg update-metadata")
             else
