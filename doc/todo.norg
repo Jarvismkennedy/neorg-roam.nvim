@@ -1,0 +1,53 @@
+@document.meta
+title: Dev notes.
+description: 
+authors: jarviskennedy
+categories: 
+created: 2023-08-30
+updated: 2023-08-30
+version: 1.1.1
+@end
+
+* To Dos
+  - (x) Separate capture logic into its on module.
+  - ( ) Write test cases for all functions so that you know when you mess something up.
+  - (x) Refactor the picker logic. 
+  - ( ) Separate find logic into its own module?.
+  - ( ) Add workspace keymaps, i.e. Capture to workspace, find note in workspace, etc. Just add `w`
+	after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace
+	to search through. How should this work for links though? I think you should only be able to
+	link within the current workspace?
+  - ( ) Capture templates
+  - ( ) SQL module 
+  - ( ) Back links (super important)
+  - ( ) Tags ?
+  - ( ) Other types of linkables.
+
+
+* Capture templates
+  This is a section about capture templates.
+
+** Supported Syntax 
+   - Named capture templates,
+   - file (template for the file name)
+   - title (title for the document metadata)
+   - narrowed (t/f) if the capture should narrow to only show the current capture entry.
+   - `{table of inserted text}`
+   - substitutions with `{foo}` syntax which will check for a defined function foo, or
+	 `{foo=default}` to insert default if foo doesn't exist.
+   - Need pre defined functions here like `{datetime}` and `{datetimeiso}`, and
+	 `{slug}`,`{file_hash}` for the
+	 filename slug / hash.
+   @code lua
+   capture_templates = {
+   	template_name = {
+   		file = "template/for/filename/{slug}.norg",
+   		title="{prompt} this title was prompted for", -- or nil, then it defaults to slug ,
+   		narrowed = true, -- or nil or false,
+   		tag="a_tag_for_this_type_of_note", -- potentially? for easier searching through notes?
+   		template = {"* A list of strings that will be inserted with support for substitutions
+   		like {datetime}, {slug}, etc.", "Actually all of the file, title, tag, etc, need to
+   		support substitutions."}
+   	},
+   }
+   @end
