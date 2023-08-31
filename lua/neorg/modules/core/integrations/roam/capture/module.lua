@@ -15,7 +15,6 @@ module.setup = function()
 end
 module.private = {
     register_buffer_for_capture_keymaps = function(buf)
-        vim.print(module.config.public.keymaps)
         vim.keymap.set("n", module.config.public.keymaps.capture_save, module.public.capture_save, { buffer = buf })
         vim.keymap.set("n", module.config.public.keymaps.capture_cancel, module.public.capture_cancel, { buffer = buf })
         vim.keymap.set("v", module.config.public.keymaps.capture_save, module.public.capture_save, { buffer = buf })

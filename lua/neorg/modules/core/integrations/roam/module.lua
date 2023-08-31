@@ -1,9 +1,7 @@
 local neorg = require("neorg.core")
 local utils = require("neorg.modules.core.utils")
 local module = neorg.modules.create("core.integrations.roam")
-
--- require sub modules
-
+module.config = {}
 module.setup = function()
     return {
         success = true,
@@ -15,17 +13,12 @@ module.setup = function()
         },
     }
 end
-module.config.public = {
-    keymaps = {
-        select_prompt = "<C-n>",
-        insert_link = "<leader>ni",
-        find_note = "<leader>nf",
-        capture_note = "<leader>nc",
-        capture_index = "<leader>nci",
-        capture_cancel = "<C-q>",
-        capture_save = "<C-w>",
-    },
-}
+module.neorg_post_load = function()
+    -- set the keybind for pulling up telescope
+    vim.keymap.set("n", module.config.public.keymaps.find_note, module.public.find_note)
+    vim.keymap.set("n", module.config.public.keymaps.capture_note, module.public.capture_note)
+    vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
+end
 module.load = function()
     module.required["core.integrations.roam.capture"].set_keymaps(module.config.public.keymaps)
     -- register keybinds
@@ -43,12 +36,68 @@ module.load = function()
             },
         }, { silent = true, noremap = true })
     end)
-
-    -- set the keybind for pulling up telescope
-    vim.keymap.set("n", module.config.public.keymaps.find_note, module.public.find_note)
-    vim.keymap.set("n", module.config.public.keymaps.capture_note, module.public.capture_note)
-    vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
 end
+module.config.public = {
+    keymaps = {
+        select_prompt = "<C-n>",
+        insert_link = "<leader>ni",
+        find_note = "<leader>nf",
+        capture_note = "<leader>nc",
+        capture_index = "<leader>nci",
+        capture_cancel = "<C-q>",
+        capture_save = "<C-w>",
+    },
+}
+module.config.private = {
+    find_note = function(prompt, selection)
+        local choice = nil
+        if selection == nil and prompt == nil then
+            return
+        end
+        if selection == nil then
+            choice = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg"
+        else
+            choice = selection[1]
+        end
+        vim.cmd("e " .. choice)
+        local buf = vim.api.nvim_get_current_buf()
+        local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
+        if metadata_present then
+            vim.cmd("Neorg update-metadata")
+        else
+            vim.cmd("Neorg inject-metadata")
+        end
+    end,
+    capture_note = function(prompt, selection)
+        local choice = nil
+        if selection == nil and prompt == nil then
+            return
+        end
+        if selection == nil then
+            choice = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg"
+        else
+            choice = selection[1]
+        end
+        module.required["core.integrations.roam.capture"].capture_note(choice)
+    end,
+    capture_link = function(prompt, file)
+        if prompt == nil and file == nil then
+            return
+        end
+        local link = ""
+        if file == nil then
+            link = "{:" .. prompt .. ":}[" .. prompt .. "]"
+            module.required["core.integrations.roam.capture"].capture_link(
+                module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg",
+                link
+            )
+        else
+            local start_index = #module.required["core.dirman"].get_current_workspace()[2] + 2
+            link = "{:" .. file[1]:sub(start_index, -6) .. ":}[" .. file[1]:sub(start_index, -6) .. "]"
+            vim.api.nvim_put({ link }, "c", true, true)
+        end
+    end,
+}
 
 -- handle events.
 module.on_event = function(event)
@@ -90,53 +139,22 @@ module.public = {
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
         local title = "Find note - " .. module.config.public.keymaps.select_prompt .. " to create new note"
-        local picker = utils.generate_picker(files, curr_wksp, title)
-        local action = function(prompt, selection)
-            local choice = nil
-            if selection == nil and prompt == nil then
-                return
-            end
-            if selection == nil then
-                choice = curr_wksp[2] .. "/" .. prompt .. ".norg"
-            else
-                choice = selection[1]
-            end
-            vim.cmd("e " .. choice)
-            local buf = vim.api.nvim_get_current_buf()
-            local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
-            if metadata_present then
-                vim.cmd("Neorg update-metadata")
-            else
-                vim.cmd("Neorg inject-metadata")
-            end
-        end
+        local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.find_note)
         if picker == nil then
             return
         end
-        picker(action):find()
+        picker:find()
     end,
     capture_note = function()
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
         local title = "Capture note - " .. module.config.public.keymaps.select_prompt .. " to create new capture"
-        local picker = utils.generate_picker(files, curr_wksp, title)
-        local action = function(prompt, selection)
-            local choice = nil
-            if selection == nil and prompt == nil then
-                return
-            end
-            if selection == nil then
-                choice = curr_wksp[2] .. "/" .. prompt .. ".norg"
-            else
-                choice = selection[1]
-            end
-            module.required["core.integrations.roam.capture"].capture_note(choice)
-        end
+        local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.capture_note)
         if picker == nil then
             return
         end
-        picker(action):find()
+        picker:find()
     end,
     capture_index = function()
         local curr_wksp = module.required["core.dirman"].get_current_workspace()[2]
@@ -147,25 +165,8 @@ module.public = {
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
         local title = "Insert link - " .. module.config.public.keymaps.select_prompt .. " to create and insert"
-        local picker = utils.generate_picker(files, curr_wksp, title)
-        local action = function(prompt, file)
-            if prompt == nil and file == nil then
-                return
-            end
-            local link = ""
-            if file == nil then
-                link = "{:" .. prompt .. ":}[" .. prompt .. "]"
-                module.required["core.integrations.roam.capture"].capture_link(
-                    curr_wksp[2] .. "/" .. prompt .. ".norg",
-                    link
-                )
-            else
-                local start_index = #curr_wksp[2] + 2
-                link = "{:" .. file[1]:sub(start_index, -6) .. ":}[" .. file[1]:sub(start_index, -6) .. "]"
-                vim.api.nvim_put({ link }, "c", true, true)
-            end
-        end
-        picker(action):find()
+        local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.capture_link)
+        picker:find()
     end,
     get_back_links = function() end,
     db_sync = function() end,

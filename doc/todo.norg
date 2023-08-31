@@ -10,8 +10,9 @@ version: 1.1.1
 
 * To Dos
   - (x) Separate capture logic into its on module.
-  - ( ) Refactor the picker logic. 
-  - ( ) Separate find logic into its own module.
+  - ( ) Write test cases for all functions so that you know when you mess something up.
+  - (x) Refactor the picker logic. 
+  - ( ) Separate find logic into its own module?.
   - ( ) Add workspace keymaps, i.e. Capture to workspace, find note in workspace, etc. Just add `w`
 	after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace
 	to search through. How should this work for links though? I think you should only be able to
@@ -38,15 +39,15 @@ version: 1.1.1
 	 `{slug}`,`{file_hash}` for the
 	 filename slug / hash.
    @code lua
-   capture_templates = { 
-	   template_name = {
-		   file = "template/for/filename/{slug}.norg",
-		   title="{prompt} this title was prompted for", -- or nil, then it defaults to slug ,
-		   narrowed = true, -- or nil or false,
-		   tag="a_tag_for_this_type_of_note", -- potentially? for easier searching through notes?
-		   template = {"* A list of strings that will be inserted with support for substitutions
-		   like {datetime}, {slug}, etc.", "Actually all of the file, title, tag, etc, need to
-		   support substitutions."}
-	   },
+   capture_templates = {
+   	template_name = {
+   		file = "template/for/filename/{slug}.norg",
+   		title="{prompt} this title was prompted for", -- or nil, then it defaults to slug ,
+   		narrowed = true, -- or nil or false,
+   		tag="a_tag_for_this_type_of_note", -- potentially? for easier searching through notes?
+   		template = {"* A list of strings that will be inserted with support for substitutions
+   		like {datetime}, {slug}, etc.", "Actually all of the file, title, tag, etc, need to
+   		support substitutions."}
+   	},
    }
    @end

@@ -25,7 +25,10 @@ M.reload = function()
                     default_workspace = "plugin_dev",
                 },
             },
-            ["core.integrations.roam"] = {},
+            ["core.looking-glass"] = {},
+            ["core.integrations.roam"] = { config = { keymaps = {
+                find_note = "<leader>nrf",
+            } } },
         },
     })
 end
