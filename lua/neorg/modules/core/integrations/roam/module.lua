@@ -47,6 +47,7 @@ module.config.public = {
         capture_cancel = "<C-q>",
         capture_save = "<C-w>",
     },
+    theme = "ivy",
 }
 module.config.private = {
     find_note = function(prompt, selection)

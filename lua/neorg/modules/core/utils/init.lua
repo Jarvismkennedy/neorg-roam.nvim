@@ -37,7 +37,10 @@ M.generate_picker = function(files, curr_wksp, title, action)
     local actions = require("telescope.actions")
     local action_state = require("telescope.actions.state")
     local conf = require("telescope.config").values
-    return pickers.new({}, {
+    local theme_name = require("neorg.modules.core.integrations.roam.module").config.public.theme
+    local opts = require("telescope.themes")["get_" .. theme_name]({})
+
+    return pickers.new(opts, {
         prompt_title = title,
         attach_mappings = function(prompt_bufnr, map)
             actions.select_default:replace(function()
