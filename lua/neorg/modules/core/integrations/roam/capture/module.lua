@@ -18,7 +18,7 @@ module.config.public = {
     capture_templates = {
         {
             name = "default",
-            file = "a/nested/dir/${datetimeiso}-${title}",
+            file = "${date}_${title}",
             narrowed = false,
             lines = { "" },
         },
@@ -29,9 +29,6 @@ module.config.public = {
         end,
         date = function(file_metadata)
             return os.date("%Y-%m-%d")
-        end,
-        datetimeiso = function(file_metadata)
-            return os.date("!%Y-%m-%dT%TZ")
         end,
     },
 }
@@ -150,30 +147,50 @@ module.public = {
             callback(module.config.public.capture_templates[1])
         end
     end,
-    capture_link = function(file, link)
+    capture_link = function(file_metadata)
         local buf = vim.api.nvim_get_current_buf()
         local win = vim.api.nvim_get_current_win()
         local pos = vim.api.nvim_win_get_cursor(win)
         -- save the buffer and cursor position to insert link on save
-        module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2], link = link }
-        local buf_win = utils.create_capture_window()
-        vim.api.nvim_buf_call(buf_win[1], function()
-            vim.cmd("e " .. file)
-            -- put cursor at the end of metadata.
-            local metadata_present =
-                module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
-            if metadata_present then
-                vim.cmd("Neorg update-metadata")
-            else
-                vim.cmd("Neorg inject-metadata")
-            end
-            -- search for the end of the metadata tag.
-            local row_of_meta_end = vim.fn.search("@end")
-            vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
-            vim.cmd(":normal o")
-            vim.cmd(":normal o")
-        end)
-        module.private.register_buffer_for_capture_link_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
+        module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2] }
+        local callback = function(template)
+            local buf_win = utils.create_capture_window()
+            vim.api.nvim_buf_call(buf_win[1], function()
+                local file = module.required["core.dirman"].get_current_workspace()[2] .. "/"
+                local file_exists = vim.fn.filereadable(file .. file_metadata.title .. ".norg") == 1
+                local norg_link = ""
+                if file_exists then
+                    file = file .. file_metadata.title .. ".norg"
+                    norg_link = "{:" .. file_metadata.title .. ":}"
+                else
+                    local substituted_file_name = module.private.substitute(template.file, file_metadata)
+                    norg_link = "{:" .. substituted_file_name .. ":}"
+                    file = file .. substituted_file_name .. ".norg"
+                end
+                local link = norg_link .. "[" .. file_metadata.title .. "]"
+                vim.print({ f = file, l = link })
+                module.private.capture_link_buffer.link = link
+                vim.cmd("e " .. file)
+                -- put cursor at the end of metadata.
+                local metadata_present =
+                    module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
+                if metadata_present then
+                    vim.cmd("Neorg update-metadata")
+                else
+                    vim.cmd("Neorg inject-metadata")
+                end
+                -- search for the end of the metadata tag.
+                local row_of_meta_end = vim.fn.search("@end")
+                vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
+                vim.api.nvim_put(module.private.get_template_lines(template), "l", true, true)
+            end)
+            module.private.register_buffer_for_capture_link_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
+        end
+        if #module.config.public.capture_templates > 1 then
+            utils.generate_capture_template_picker(module.config.public.capture_templates, callback):find()
+        else
+            callback(module.config.public.capture_templates[1])
+        end
     end,
 
     capture_save = function()

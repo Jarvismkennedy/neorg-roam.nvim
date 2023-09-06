@@ -58,7 +58,7 @@ module.config.private = {
         if selection == nil then
             choice = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg"
         else
-            choice = selection[1]
+            choice = selection.value
         end
         vim.cmd("e " .. choice)
         local buf = vim.api.nvim_get_current_buf()
@@ -81,20 +81,21 @@ module.config.private = {
         end
         module.required["core.integrations.roam.capture"].capture_note(file_metadata)
     end,
-    capture_link = function(prompt, file)
+    insert_link = function(prompt, selection)
+        local file = nil
+        if selection ~= nil then
+            file = selection.display
+        end
         if prompt == nil and file == nil then
             return
         end
-        local link = ""
         if file == nil then
-            link = "{:" .. prompt .. ":}[" .. prompt .. "]"
-            module.required["core.integrations.roam.capture"].capture_link(
-                module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg",
-                link
-            )
+            local file_metadata = {
+                title = prompt,
+            }
+            module.required["core.integrations.roam.capture"].capture_link(file_metadata)
         else
-            local start_index = #module.required["core.dirman"].get_current_workspace()[2] + 2
-            link = "{:" .. file[1]:sub(start_index, -6) .. ":}[" .. file[1]:sub(start_index, -6) .. "]"
+            local link = "{:" .. file .. ":}[" .. file .. "]"
             vim.api.nvim_put({ link }, "c", true, true)
         end
     end,
@@ -131,6 +132,7 @@ module.private = {
 
         local curr_wksp = dirman.get_current_workspace()
         local files = dirman.get_norg_files(curr_wksp[1])
+        vim.print(curr_wksp)
         return { curr_wksp, files }
     end,
 }
@@ -139,7 +141,7 @@ module.public = {
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
-        local title = "Find note - " .. module.config.public.keymaps.select_prompt .. " to create new note"
+        local title = "Find note - " .. module.config.public.keymaps.select_prompt .. " to select new note"
         local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.find_note)
         if picker == nil then
             return
@@ -150,7 +152,7 @@ module.public = {
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
-        local title = "Capture note - " .. module.config.public.keymaps.select_prompt .. " to create new capture"
+        local title = "Capture note - " .. module.config.public.keymaps.select_prompt .. " to select new capture"
         local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.capture_note)
         if picker == nil then
             return
@@ -166,7 +168,7 @@ module.public = {
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
         local title = "Insert link - " .. module.config.public.keymaps.select_prompt .. " to create and insert"
-        local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.capture_link)
+        local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.insert_link)
         picker:find()
     end,
     get_back_links = function() end,
