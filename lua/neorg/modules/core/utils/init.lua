@@ -40,6 +40,11 @@ M.generate_picker = function(files, curr_wksp, title, action)
     local theme_name = require("neorg.modules.core.integrations.roam.module").config.public.theme
     local opts = require("telescope.themes")["get_" .. theme_name]({})
 
+    local start_index = #curr_wksp[2] + 2
+    local entries = {}
+    for i, v in ipairs(files) do
+        table.insert(entries, { v, v:sub(start_index, -6) })
+    end
     return pickers.new(opts, {
         prompt_title = title,
         attach_mappings = function(prompt_bufnr, map)
@@ -69,8 +74,14 @@ M.generate_picker = function(files, curr_wksp, title, action)
         previewer = conf.file_previewer({}),
         sorter = conf.file_sorter({}),
         finder = finders.new_table({
-            results = files,
-            entry_maker = make_entry.gen_from_file({ cwd = curr_wksp[2] }),
+            results = entries,
+            entry_maker = function(entry)
+                return {
+                    value = entry[1],
+                    display = entry[2],
+                    ordinal = entry[2],
+                }
+            end,
         }),
     })
 end
