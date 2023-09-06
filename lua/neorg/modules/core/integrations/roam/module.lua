@@ -70,16 +70,16 @@ module.config.private = {
         end
     end,
     capture_note = function(prompt, selection)
-        local choice = nil
         if selection == nil and prompt == nil then
             return
         end
+        local file_metadata = {}
         if selection == nil then
-            choice = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg"
+            file_metadata.title = prompt
         else
-            choice = selection[1]
+            file_metadata.title = selection.display
         end
-        module.required["core.integrations.roam.capture"].capture_note(choice)
+        module.required["core.integrations.roam.capture"].capture_note(file_metadata)
     end,
     capture_link = function(prompt, file)
         if prompt == nil and file == nil then
