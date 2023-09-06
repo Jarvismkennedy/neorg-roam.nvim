@@ -18,7 +18,7 @@ module.config.public = {
     capture_templates = {
         {
             name = "default",
-            file = "${date}_${title}",
+            file = "nested/${date}_${title}",
             narrowed = false,
             lines = { "" },
         },
@@ -195,6 +195,7 @@ module.public = {
 
     capture_save = function()
         vim.api.nvim_buf_call(0, function()
+            vim.cmd(':call mkdir(expand("%:p:h"), "p")')
             vim.cmd("w")
             vim.cmd("bd")
         end)

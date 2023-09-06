@@ -56,17 +56,22 @@ module.config.private = {
             return
         end
         if selection == nil then
-            choice = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. prompt .. ".norg"
+            choice = prompt
         else
-            choice = selection.value
+            choice = selection.display
         end
-        vim.cmd("e " .. choice)
-        local buf = vim.api.nvim_get_current_buf()
-        local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
-        if metadata_present then
-            vim.cmd("Neorg update-metadata")
+        local file_path = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. choice .. ".norg"
+        if vim.fn.filereadable(file_path) == 0 then
+            module.required["core.integrations.roam.capture"].capture_note({ title = choice })
         else
-            vim.cmd("Neorg inject-metadata")
+            vim.cmd("e " .. file_path)
+            local buf = vim.api.nvim_get_current_buf()
+            local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
+            if metadata_present then
+                vim.cmd("Neorg update-metadata")
+            else
+                vim.cmd("Neorg inject-metadata")
+            end
         end
     end,
     capture_note = function(prompt, selection)
