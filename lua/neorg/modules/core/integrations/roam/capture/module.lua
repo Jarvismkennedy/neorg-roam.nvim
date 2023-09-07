@@ -31,7 +31,7 @@ module.config.public = {
             lines = { "" },
         },
     },
-    substitution = {
+    substitutions = {
         title = function(file_metadata)
             return file_metadata.title
         end,
@@ -64,7 +64,7 @@ module.private = {
     end,
     substitute = function(line, file_metadata)
         return line:gsub("%${(%a+)}", function(s)
-            local func = module.config.public.substitution[s]
+            local func = module.config.public.substitutions[s]
             if func == nil then
                 local input = vim.fn.input({ prompt = s .. ": " })
                 return input
