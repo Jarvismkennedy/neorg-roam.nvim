@@ -28,7 +28,27 @@ M.reload = function()
                 },
             },
             ["core.looking-glass"] = {},
-            ["core.integrations.roam"] = {},
+            ["core.integrations.roam"] = {
+                config = {
+                    capture_templates = {
+                        {
+                            name = "default",
+                            file = "${title}",
+                            lines = { "" },
+                        },
+                        {
+                            name = "cs new note",
+                            file = "classes/computer_science/${title}/${title}_${date}",
+                            lines = { "", "* ${title} Lecture ${date}" },
+                        },
+                        {
+                            name = "new work todo",
+                            file = "work/todo/${title}",
+                            lines = { "", "- ( )  " },
+                        },
+                    },
+                },
+            },
         },
     })
 end

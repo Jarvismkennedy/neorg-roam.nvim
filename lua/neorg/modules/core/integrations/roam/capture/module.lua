@@ -20,26 +20,10 @@ module.config.private = {
 		name: (tag_name) @name (#eq? @name "document.meta")
 	) @meta_data
 	]],
+    temporary_substitutions = {},
 }
-module.config.public = {
-    keymaps = {},
-    capture_templates = {
-        {
-            name = "default",
-            file = "${title}",
-            narrowed = false,
-            lines = { "" },
-        },
-    },
-    substitutions = {
-        title = function(file_metadata)
-            return file_metadata.title
-        end,
-        date = function(file_metadata)
-            return os.date("%Y-%m-%d")
-        end,
-    },
-}
+module.config.public = {}
+
 module.private = {
     get_meta_range = function(buf)
         buf = buf or 0
@@ -59,14 +43,25 @@ module.private = {
         )
         return range
     end,
-    get_template_lines = function(template)
-        return { "", "testing get_template_lines" }
+    get_template_lines = function(template, file_metadata)
+        local lines = {}
+        for i, line in ipairs(template.lines) do
+            local sub = module.private.substitute(line, file_metadata)
+            table.insert(lines, sub)
+        end
+        module.config.private.temporary_substitutions = {}
+        return lines
     end,
     substitute = function(line, file_metadata)
         return line:gsub("%${(%a+)}", function(s)
             local func = module.config.public.substitutions[s]
             if func == nil then
+                if module.config.private.temporary_substitutions[s] ~= nil then
+                    return module.config.private.temporary_substitutions[s]
+                end
+
                 local input = vim.fn.input({ prompt = s .. ": " })
+                module.config.private.temporary_substitutions[s] = input
                 return input
             end
             if type(func) == "function" then
@@ -128,8 +123,8 @@ module.private = {
     end,
 }
 module.public = {
-    set_keymaps = function(maps)
-        module.config.public.keymaps = maps
+    set_config = function(config)
+        module.config.public = config
     end,
     capture_note = function(file_metadata)
         local callback = function(template)
@@ -159,12 +154,14 @@ module.public = {
                     vim.cmd("Neorg inject-metadata")
                 end
 
-                local end_row = module.private.get_meta_range(0)[3] + 1
+                local end_row = module.private.get_meta_range(0)[3] + 2
                 if end_row == nil then
                     error("ERROR WITH TREESITTER METADATA QUERY")
                 end
                 vim.cmd(string.format(":call cursor(%d,0)", end_row))
-                vim.api.nvim_put(module.private.get_template_lines(template), "l", true, true)
+                local lines = module.private.get_template_lines(template, file_metadata)
+                vim.api.nvim_put(lines, "c", false, true)
+                vim.cmd("normal a")
             end)
             module.private.register_buffer_for_capture_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
         end

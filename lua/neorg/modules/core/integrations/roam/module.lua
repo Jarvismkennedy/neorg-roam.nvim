@@ -20,7 +20,9 @@ module.neorg_post_load = function()
     vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
 end
 module.load = function()
-    module.required["core.integrations.roam.capture"].set_keymaps(module.config.public.keymaps)
+    -- pass config to capture module.
+    module.required["core.integrations.roam.capture"].set_config(module.config.public)
+
     -- register keybinds
     local keybinds = module.required["core.keybinds"]
     keybinds.register_keybinds(module.name, {
@@ -46,6 +48,22 @@ module.config.public = {
         capture_index = "<leader>nci",
         capture_cancel = "<C-q>",
         capture_save = "<C-w>",
+    },
+    capture_templates = {
+        {
+            name = "default",
+            file = "${title}",
+            narrowed = false,
+            lines = { "" },
+        },
+    },
+    substitutions = {
+        title = function(file_metadata)
+            return file_metadata.title
+        end,
+        date = function(file_metadata)
+            return os.date("%Y-%m-%d")
+        end,
     },
     theme = "ivy",
 }

@@ -46,7 +46,7 @@
 						   name = "default",
 						   file =  "${title}",
 						   narrowed = false,
-						   target = "metadata"
+						   target = "metadata",
 						   lines = { "" }, 
 					   }
 				   },
@@ -68,9 +68,9 @@
    Capture templates are defined as a list in the roam config table.
    @code lua	
    {
-	   name = "CS new note"
-	   file = "classes/computer_science/${class}/${title}_${date}"
-	   lines = { "","* ${class} Lecture ${date}" }
+	   name = "CS new note",
+	   file = "classes/computer_science/${class}/${title}_${date}",
+	   lines = { "","* ${class} Lecture ${date}" },
    }
    @end
    Capture templates have support for substitution. Substitutions are functions defined in the
@@ -82,8 +82,7 @@
 	- ( ) Currently capture templates always insert after the metadata. Support a target property to
 	   insert after any treesitter node.
 	- ( ) Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
-	- ( ) pass the substitution config to the capture module.
-	- ( ) save the prompted substitutions for the template so the user only is prompted for it once.
+	- ( ) Don't open a floating capture window if the file is in the current buffer. 
 
 
 ** currently implemented features
