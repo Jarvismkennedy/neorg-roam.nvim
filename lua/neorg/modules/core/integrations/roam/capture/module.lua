@@ -10,15 +10,23 @@ module.setup = function()
             "core.keybinds",
             "core.dirman",
             "core.esupports.metagen",
+            "core.integrations.treesitter",
         },
     }
 end
+module.config.private = {
+    metadata_query = [[
+	(ranged_verbatim_tag
+		name: (tag_name) @name (#eq? @name "document.meta")
+	) @meta_data
+	]],
+}
 module.config.public = {
     keymaps = {},
     capture_templates = {
         {
             name = "default",
-            file = "nested/${date}_${title}",
+            file = "${title}",
             narrowed = false,
             lines = { "" },
         },
@@ -33,8 +41,25 @@ module.config.public = {
     },
 }
 module.private = {
+    get_meta_range = function(buf)
+        buf = buf or 0
+        --{start row, start col, end row, end col }
+        local range = nil
+        module.required["core.integrations.treesitter"].execute_query(
+            module.config.private.metadata_query,
+            function(query, id, node, metadata)
+                if query.captures[id] == "meta_data" then
+                    range = { node:range() }
+                    return true
+                end
+            end,
+            0,
+            0,
+            -1
+        )
+        return range
+    end,
     get_template_lines = function(template)
-        vim.print(template)
         return { "", "testing get_template_lines" }
     end,
     substitute = function(line, file_metadata)
@@ -133,10 +158,12 @@ module.public = {
                 else
                     vim.cmd("Neorg inject-metadata")
                 end
-                -- search for the end of the metadata tag.
-                -- use treesitter instead.
-                local row_of_meta_end = vim.fn.search("@end")
-                vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
+
+                local end_row = module.private.get_meta_range(0)[3] + 1
+                if end_row == nil then
+                    error("ERROR WITH TREESITTER METADATA QUERY")
+                end
+                vim.cmd(string.format(":call cursor(%d,0)", end_row))
                 vim.api.nvim_put(module.private.get_template_lines(template), "l", true, true)
             end)
             module.private.register_buffer_for_capture_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
@@ -180,8 +207,12 @@ module.public = {
                     vim.cmd("Neorg inject-metadata")
                 end
                 -- search for the end of the metadata tag.
-                local row_of_meta_end = vim.fn.search("@end")
-                vim.cmd(string.format(":call cursor(%d,0)", row_of_meta_end))
+                --
+                local end_row = module.private.get_meta_range(0)[3] + 1
+                if end_row == nil then
+                    error("ERROR WITH TREESITTER METADATA QUERY")
+                end
+                vim.cmd(string.format(":call cursor(%d,0)", end_row))
                 vim.api.nvim_put(module.private.get_template_lines(template), "l", true, true)
             end)
             module.private.register_buffer_for_capture_link_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
