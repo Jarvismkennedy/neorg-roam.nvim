@@ -74,8 +74,8 @@ Capture templates are defined as a list in the roam config table.
 ```lua	
 {
  name = "CS new note",
- file = "classes/computer_science/${class}/${title}_${date}",
- lines = { "","* ${class} Lecture ${date}" },
+ file = "classes/computer_science/${title}/${title}_${date}",
+ lines = { "","* ${title} Lecture ${date}", "** ${topic}", "" },
 }
 ```
 Capture templates have support for substitution. Substitutions are functions defined in the
@@ -90,6 +90,11 @@ found then you will be prompted for the value.
       insert after any treesitter node.
 -  Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
 -  Don't open a floating capture window if the file is in the current buffer. 
+-  update file_metadata to use neorg meta_data table. Right now the example capture template
+      is broken 
+-  Update to use the title parameter as the metadata title on new note create instead of the
+      file name otherwise the example template will be broken if you re capture to the same note with
+      the same template
 
 
 
