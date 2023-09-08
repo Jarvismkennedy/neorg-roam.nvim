@@ -4,7 +4,7 @@ description: neorgroam readme file.
 authors: jarviskennedy
 categories: 
 created: 2023-09-07T23:26:01-0500
-updated: 2023-09-07T23:31:13-0500
+updated: 2023-09-07T23:43:52-0500
 version: 1.1.1
 @end
 
@@ -89,14 +89,12 @@ version: 1.1.1
    `${title}`, and `${date}` as above. The `${title}` substitution is the `@document.meta` title if the file exists already,
    or the telescope prompt if it does not exist. The file and title fields are only updated when
    capturing a new file.
-   | field | description                                                                           |
-   | --    | --                                                                                    |
-   | name  | identifier for the template                                                           |
-   | file  | the path where the file will be saved. The norg extension will be added automatically |
-   | title | the metadata title to inject into the `@document.metadata` tag                        |
-   | lines | the list of lines to insert                                                           |
 
-
+*** Capture template fields
+	- *name:* identifier for the template 
+	- *file* the path where the file will be saved. The norg extension will be added automatically
+	- *title:* the metadata title to inject into the `@document.meta` tag
+	- *lines:* the list of lines to insert
 
 *** Capture templates to do
 	- ( ) Currently capture templates always insert after the metadata. Support a target property to

@@ -88,14 +88,14 @@ metadata table currently only supports the `title` field. The builtin substituti
 `${title}`, and `${date}` as above. The `${title}` substitution is the `@document.meta` title if the file exists already,
 or the telescope prompt if it does not exist. The file and title fields are only updated when
 capturing a new file.
- field | description                                                                           |
- --    | --                                                                                    |
- name  | identifier for the template                                                           |
- file  | the path where the file will be saved The norg extension will be added automatically |
- title | the metadata title to inject into the `@documentmetadata` tag                        |
- lines | the list of lines to insert                                                           |
 
 
+### Capture template fields
+
+- **name:** identifier for the template 
+- **file** the path where the file will be saved. The norg extension will be added automatically
+- **title:** the metadata title to inject into the `@document.meta` tag
+- **lines:** the list of lines to insert
 
 
 ### Capture templates to do
