@@ -4,7 +4,7 @@ description:
 authors: jarviskennedy
 categories: 
 created: 2023-08-30
-updated: 2023-08-30
+updated: 2023-09-06T23:42:47-0500
 version: 1.1.1
 @end
 
@@ -14,19 +14,20 @@ version: 1.1.1
   - (x) Refactor the picker logic. 
   - ( ) Separate find logic into its own module?.
   - ( ) Add workspace keymaps, i.e. Capture to workspace, find note in workspace, etc. Just add `w`
-	after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace
-	to search through. How should this work for links though? I think you should only be able to
-	link within the current workspace?
+		after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace
+		to search through. How should this work for links though? I think you should only be able to
+		link within the current workspace?
   - ( ) Capture templates
   - ( ) SQL module 
   - ( ) Back links (super important)
   - ( ) Tags ?
   - ( ) Other types of linkables.
+  - ( ) look into dirman, is it too slow using dirman to get files if there are lots of files or
+		does it handle it fine?
 
 
 * Capture templates
   This is a section about capture templates.
-
 ** Supported Syntax 
    - Named capture templates,
    - file (template for the file name)
@@ -36,18 +37,20 @@ version: 1.1.1
    - substitutions with `{foo}` syntax which will check for a defined function foo, or
 	 `{foo=default}` to insert default if foo doesn't exist.
    - Need pre defined functions here like `{datetime}` and `{datetimeiso}`, and
-	 `{slug}`,`{file_hash}` for the
-	 filename slug / hash.
+	 `{slug}`,`{file_hash}` for the filename slug / hash.
+   - `{Test}` should do the following in order: 
+   -- Look for functions defined in the config named `Test`.
+   -- If nothing exists prompt the user for the input.
    @code lua
    capture_templates = {
-   	template_name = {
-   		file = "template/for/filename/{slug}.norg",
-   		title="{prompt} this title was prompted for", -- or nil, then it defaults to slug ,
-   		narrowed = true, -- or nil or false,
-   		tag="a_tag_for_this_type_of_note", -- potentially? for easier searching through notes?
-   		template = {"* A list of strings that will be inserted with support for substitutions
-   		like {datetime}, {slug}, etc.", "Actually all of the file, title, tag, etc, need to
-   		support substitutions."}
-   	},
+	   template_name = { 
+		   file = "template/for/filename/{slug}.norg",
+		   title="{prompt} this title was prompted for", -- or nil, then it defaults to slug ,
+		   narrowed = true, -- or nil or false,
+		   target = "* heading1", -- potentially? for easier searching through notes?
+		   template = {"* A list of strings that will be inserted with support for substitutions
+		ike {datetime}, {slug}, etc.", "Actually all of the file, title, tag, etc, need to
+		upport substitutions."}
+	   },
    }
    @end

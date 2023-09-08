@@ -5,6 +5,8 @@ M.reload = function()
     local reload = require("plenary.reload").reload_module
     reload("neorg")
     reload("neorg.modules.core.utils")
+    reload("neorg.modules.core.integrations.roam.module")
+    reload("neorg.modules.core.integrations.roam.capture.module")
     require("neorg").setup({
         load = {
             ["core.defaults"] = {}, -- Loads default behaviour
@@ -26,9 +28,21 @@ M.reload = function()
                 },
             },
             ["core.looking-glass"] = {},
-            ["core.integrations.roam"] = { config = { keymaps = {
-                find_note = "<leader>nrf",
-            } } },
+            ["core.integrations.roam"] = {
+                config = {
+                    capture_templates = {
+                        {
+                            name = "default",
+                            lines = { "", "" },
+                        },
+                        {
+                            name = "New Class Note",
+                            file = "${title}_${date}",
+                            lines = { "", "* ${heading1}", "" },
+                        },
+                    },
+                },
+            },
         },
     })
 end
