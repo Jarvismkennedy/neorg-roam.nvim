@@ -111,7 +111,6 @@ capturing a new file.
 - Insert links to norg files.
 - Capture notes. 
 - Capture to the index file.
-- All of these methods create the files if they don't exist.
 - Capture templates
 
 
