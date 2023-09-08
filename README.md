@@ -48,8 +48,6 @@ require("neorg").setup({
 		   {
 			   name = "default",
 			   file =  "${title}",
-			   narrowed = false,
-			   target = "metadata",
 			   lines = { "" }, 
 		   }
 	   },
@@ -74,14 +72,25 @@ Capture templates are defined as a list in the roam config table.
 ```lua	
 {
  name = "CS new note",
- file = "classes/computer_science/${title}/${title}_${date}",
- lines = { "","* ${title} Lecture ${date}", "** ${topic}", "" },
+ file = "classes/computer_science/${title}_${date}",
+ title = "${title}"
+ lines = { "","* ${heading1}", "" },
 }
 ```
-Capture templates have support for substitution. Substitutions are functions defined in the
-config table which take the metadata table as a parameter and  return a string. The default
-substitutions functions are shown in the default config above. If a substitution function is not
-found then you will be prompted for the value.
+Capture templates have support for substitution with the `"${substitution}"` syntax. Substitutions are functions 
+defined in the config table which take a metadata table as a parameter and return a string. The
+metadata table currently only supports the `title` field. The builtin substitutions are
+`${title}`, and `${date}` as above. The title is the metadata title if the file exists already,
+or the telescope prompt if it does not exist. The file and title fields are only updated when
+capturing a new file.
+ field | description                                                                           |
+ --    | --                                                                                    |
+ name  | identifier for the template                                                           |
+ file  | the path where the file will be saved The norg extension will be added automatically |
+ title | the metadata title to inject into the `@documentmetadata` tag                        |
+ lines | the list of lines to insert                                                           |
+
+
 
 
 ### Capture templates to do
@@ -90,11 +99,6 @@ found then you will be prompted for the value.
       insert after any treesitter node.
 -  Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
 -  Don't open a floating capture window if the file is in the current buffer. 
--  update file_metadata to use neorg meta_data table. Right now the example capture template
-      is broken 
--  Update to use the title parameter as the metadata title on new note create instead of the
-      file name otherwise the example template will be broken if you re capture to the same note with
-      the same template
 
 
 
@@ -113,3 +117,4 @@ found then you will be prompted for the value.
 - Create sql module.
 - Implement back links.
 - Other types of linkables.
+- Write tests.

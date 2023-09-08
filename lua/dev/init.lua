@@ -33,8 +33,7 @@ M.reload = function()
                     capture_templates = {
                         {
                             name = "default",
-                            file = "${title}",
-                            lines = { "" },
+                            lines = { "", "" },
                         },
                         {
                             name = "New Class Note",

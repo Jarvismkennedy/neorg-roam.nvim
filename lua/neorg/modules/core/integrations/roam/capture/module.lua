@@ -208,7 +208,7 @@ module.public = {
                 if file_exists then
                     file = file .. title .. ".norg"
                 else
-                    file = file .. module.private.substitute(template.file, { title = title }) .. ".norg"
+                    file = file .. module.private.substitute(template.file or "${title}", { title = title }) .. ".norg"
                 end
                 vim.cmd("e " .. file)
                 module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
@@ -264,7 +264,8 @@ module.public = {
                     file = file .. title .. ".norg"
                     norg_link = "{:" .. title .. ":}"
                 else
-                    local substituted_file_name = module.private.substitute(template.file, { title = title })
+                    local substituted_file_name =
+                        module.private.substitute(template.file or "${title}", { title = title })
                     norg_link = "{:" .. substituted_file_name .. ":}"
                     file = file .. substituted_file_name .. ".norg"
                 end
