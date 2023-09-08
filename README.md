@@ -4,7 +4,7 @@
 
 # Neorg Roam
 
-- Like org-roam. But for Neorg. 
+Like org-roam. But for Neorg. 
 
 
 ## Install

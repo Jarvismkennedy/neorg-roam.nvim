@@ -4,12 +4,12 @@ description: neorgroam readme file.
 authors: jarviskennedy
 categories: 
 created: 2023-09-07T23:26:01-0500
-updated: 2023-09-07T23:30:29-0500
+updated: 2023-09-07T23:31:13-0500
 version: 1.1.1
 @end
 
 * Neorg Roam
-  - Like org-roam. But for Neorg. 
+  Like org-roam. But for Neorg. 
 
 ** Install
    Install with packer
