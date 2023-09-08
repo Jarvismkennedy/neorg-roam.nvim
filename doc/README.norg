@@ -4,12 +4,13 @@ description: neorgroam readme file.
 authors: jarviskennedy
 categories: 
 created: 2023-09-07T23:26:01-0500
-updated: 2023-09-07T23:26:38-0500
+updated: 2023-09-07T23:30:29-0500
 version: 1.1.1
 @end
 
 * Neorg Roam
-  - Trying to do some of the things that org-roam does.
+  - Like org-roam. But for Neorg. 
+
 ** Install
    Install with packer
    @code lua 
@@ -85,7 +86,7 @@ version: 1.1.1
    Capture templates have support for substitution with the `"${substitution}"` syntax. Substitutions are functions 
    defined in the config table which take a metadata table as a parameter and return a string. The
    metadata table currently only supports the `title` field. The builtin substitutions are
-   `${title}`, and `${date}` as above. The title is the `@document.meta` title if the file exists already,
+   `${title}`, and `${date}` as above. The `${title}` substitution is the `@document.meta` title if the file exists already,
    or the telescope prompt if it does not exist. The file and title fields are only updated when
    capturing a new file.
    | field | description                                                                           |
@@ -101,8 +102,6 @@ version: 1.1.1
 	- ( ) Currently capture templates always insert after the metadata. Support a target property to
 	   insert after any treesitter node.
 	- ( ) Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
-	- ( ) Don't open a floating capture window if the file is in the current buffer. 
-
 
 ** currently implemented features
    - Find notes.

@@ -4,7 +4,8 @@
 
 # Neorg Roam
 
-- Trying to do some of the things that org-roam does.
+- Like org-roam. But for Neorg. 
+
 
 ## Install
 
@@ -17,7 +18,7 @@ use({"jarvismkennedy/neorgroam.nvim",
  }
 })
 ```
-  And then set it up as a neorg module.
+And then set it up as a neorg module.
 ```lua
 require("neorg").setup({ 
  load = { 
@@ -84,7 +85,7 @@ Capture templates are defined as a list in the roam config table.
 Capture templates have support for substitution with the `"${substitution}"` syntax. Substitutions are functions 
 defined in the config table which take a metadata table as a parameter and return a string. The
 metadata table currently only supports the `title` field. The builtin substitutions are
-`${title}`, and `${date}` as above. The title is the `@document.meta` title if the file exists already,
+`${title}`, and `${date}` as above. The `${title}` substitution is the `@document.meta` title if the file exists already,
 or the telescope prompt if it does not exist. The file and title fields are only updated when
 capturing a new file.
  field | description                                                                           |
@@ -102,8 +103,6 @@ capturing a new file.
 -  Currently capture templates always insert after the metadata. Support a target property to
       insert after any treesitter node.
 -  Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
--  Don't open a floating capture window if the file is in the current buffer. 
-
 
 
 ## currently implemented features
