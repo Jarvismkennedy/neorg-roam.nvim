@@ -99,6 +99,7 @@
    - Capture templates
 
 ** TODO:
-   -  Create sql module.
-   -  Implement back links.
-   -  Other types of linkables.
+   - Create sql module.
+   - Implement back links.
+   - Other types of linkables.
+   - Need to write tests.

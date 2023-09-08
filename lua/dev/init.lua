@@ -37,14 +37,9 @@ M.reload = function()
                             lines = { "" },
                         },
                         {
-                            name = "CS new note",
-                            file = "classes/computer_science/${title}/${topic}_${date}",
-                            lines = { "", "* ${title} Lecture ${date}", "** ${topic}", "" },
-                        },
-                        {
-                            name = "new work todo",
-                            file = "work/todo/${title}",
-                            lines = { "", "- ( )  " },
+                            name = "New Class Note",
+                            file = "${title}_${date}",
+                            lines = { "", "* ${heading1}", "" },
                         },
                     },
                 },

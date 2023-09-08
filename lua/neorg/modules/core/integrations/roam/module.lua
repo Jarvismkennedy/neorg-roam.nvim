@@ -80,7 +80,7 @@ module.config.private = {
         end
         local file_path = module.required["core.dirman"].get_current_workspace()[2] .. "/" .. choice .. ".norg"
         if vim.fn.filereadable(file_path) == 0 then
-            module.required["core.integrations.roam.capture"].capture_note({ title = choice })
+            module.required["core.integrations.roam.capture"].capture_note(choice)
         else
             vim.cmd("e " .. file_path)
             local buf = vim.api.nvim_get_current_buf()
@@ -96,13 +96,13 @@ module.config.private = {
         if selection == nil and prompt == nil then
             return
         end
-        local file_metadata = {}
+        local title = nil
         if selection == nil then
-            file_metadata.title = prompt
+            title = prompt
         else
-            file_metadata.title = selection.display
+            title = selection.display
         end
-        module.required["core.integrations.roam.capture"].capture_note(file_metadata)
+        module.required["core.integrations.roam.capture"].capture_note(title)
     end,
     insert_link = function(prompt, selection)
         local file = nil
@@ -113,10 +113,8 @@ module.config.private = {
             return
         end
         if file == nil then
-            local file_metadata = {
-                title = prompt,
-            }
-            module.required["core.integrations.roam.capture"].capture_link(file_metadata)
+            local title = prompt
+            module.required["core.integrations.roam.capture"].capture_link(title)
         else
             local link = "{:" .. file .. ":}[" .. file .. "]"
             vim.api.nvim_put({ link }, "c", true, true)

@@ -1,5 +1,6 @@
 local neorg = require("neorg.core")
 local utils = require("neorg.modules.core.utils")
+local neorg_utils = require("neorg.core.utils")
 
 local module = neorg.modules.create("core.integrations.roam.capture")
 
@@ -25,6 +26,75 @@ module.config.private = {
 module.config.public = {}
 
 module.private = {
+    update_metadata_title = function(title, buf)
+        buf = buf or 0
+        -- this is coppied from metagen modules update_metadata
+        -- It would be cool if they had an api to update instead of needing to do this.
+        local present = module.required["core.esupports.metagen"].is_metadata_present(buf)
+
+        if not present then
+            return
+        end
+
+        -- Extract the root node of the norg_meta language
+        -- This process should be abstracted into a core.integrations.treesitter
+        -- function.
+        local languagetree = vim.treesitter.get_parser(buf, "norg")
+
+        if not languagetree then
+            return
+        end
+
+        local meta_root = nil
+
+        languagetree:for_each_child(function(tree)
+            if tree:lang() ~= "norg_meta" or meta_root then
+                return
+            end
+
+            local meta_tree = tree:parse()[1]
+
+            if not meta_tree then
+                return
+            end
+
+            meta_root = meta_tree:root()
+        end)
+
+        if not meta_root then
+            return
+        end
+
+        local query = neorg_utils.ts_parse_query(
+            "norg_meta",
+            [[
+            (pair
+                (key) @_key
+                (#eq? @_key "title")
+                (value) @title)
+        ]]
+        )
+
+        for id, node in query:iter_captures(meta_root, buf) do
+            local capture = query.captures[id]
+            if capture == "title" then
+                local curr_title = module.required["core.integrations.treesitter"].get_node_text(node)
+
+                if title ~= curr_title then
+                    local range = module.required["core.integrations.treesitter"].get_node_range(node)
+                    vim.api.nvim_buf_set_text(
+                        buf,
+                        range.row_start,
+                        range.column_start,
+                        range.row_end,
+                        range.column_end,
+                        { title }
+                    )
+                end
+            end
+        end
+    end,
+
     get_meta_range = function(buf)
         buf = buf or 0
         --{start row, start col, end row, end col }
@@ -49,11 +119,10 @@ module.private = {
             local sub = module.private.substitute(line, file_metadata)
             table.insert(lines, sub)
         end
-        module.config.private.temporary_substitutions = {}
         return lines
     end,
     substitute = function(line, file_metadata)
-        return line:gsub("%${(%a+)}", function(s)
+        return line:gsub("%${(%w+)}", function(s)
             local func = module.config.public.substitutions[s]
             if func == nil then
                 if module.config.private.temporary_substitutions[s] ~= nil then
@@ -126,7 +195,7 @@ module.public = {
     set_config = function(config)
         module.config.public = config
     end,
-    capture_note = function(file_metadata)
+    capture_note = function(title)
         local callback = function(template)
             local buf_win = utils.create_capture_window()
             local buf = buf_win[1]
@@ -135,19 +204,17 @@ module.public = {
                 -- of file, and enter a new line.
 
                 local file = module.required["core.dirman"].get_current_workspace()[2] .. "/"
-                local file_exists = vim.fn.filereadable(file .. file_metadata.title .. ".norg") == 1
+                local file_exists = vim.fn.filereadable(file .. title .. ".norg") == 1
                 if file_exists then
-                    file = file .. file_metadata.title .. ".norg"
+                    file = file .. title .. ".norg"
                 else
-                    file = file .. module.private.substitute(template.file, file_metadata) .. ".norg"
+                    file = file .. module.private.substitute(template.file, { title = title }) .. ".norg"
                 end
-
                 vim.cmd("e " .. file)
                 module.private.capture_buffer = vim.api.nvim_win_get_buf(buf_win[2])
                 -- put cursor at the end of metadata.
                 local metadata_present =
                     module.required["core.esupports.metagen"].is_metadata_present(module.private.capture_buffer)
-
                 if metadata_present then
                     vim.cmd("Neorg update-metadata")
                 else
@@ -159,9 +226,19 @@ module.public = {
                     error("ERROR WITH TREESITTER METADATA QUERY")
                 end
                 vim.cmd(string.format(":call cursor(%d,0)", end_row))
-                local lines = module.private.get_template_lines(template, file_metadata)
+                local metadata = module.required["core.integrations.treesitter"].get_document_metadata()
+                metadata.title = title
+                local lines = module.private.get_template_lines(template, metadata)
+
+                -- if the file doesn't already exist, update the title
+                if not file_exists and template.title ~= nil then
+                    -- replace the metadata title with the title param instead of using file name.
+                    local meta_title = module.private.substitute(template.title, { title = title })
+                    module.private.update_metadata_title(meta_title, module.private.capture_buffer)
+                end
                 vim.api.nvim_put(lines, "c", false, true)
                 vim.cmd("normal a")
+                module.config.private.temporary_substitutions = {}
             end)
             module.private.register_buffer_for_capture_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
         end
@@ -171,7 +248,7 @@ module.public = {
             callback(module.config.public.capture_templates[1])
         end
     end,
-    capture_link = function(file_metadata)
+    capture_link = function(title)
         local buf = vim.api.nvim_get_current_buf()
         local win = vim.api.nvim_get_current_win()
         local pos = vim.api.nvim_win_get_cursor(win)
@@ -181,18 +258,17 @@ module.public = {
             local buf_win = utils.create_capture_window()
             vim.api.nvim_buf_call(buf_win[1], function()
                 local file = module.required["core.dirman"].get_current_workspace()[2] .. "/"
-                local file_exists = vim.fn.filereadable(file .. file_metadata.title .. ".norg") == 1
+                local file_exists = vim.fn.filereadable(file .. title .. ".norg") == 1
                 local norg_link = ""
                 if file_exists then
-                    file = file .. file_metadata.title .. ".norg"
-                    norg_link = "{:" .. file_metadata.title .. ":}"
+                    file = file .. title .. ".norg"
+                    norg_link = "{:" .. title .. ":}"
                 else
-                    local substituted_file_name = module.private.substitute(template.file, file_metadata)
+                    local substituted_file_name = module.private.substitute(template.file, { title = title })
                     norg_link = "{:" .. substituted_file_name .. ":}"
                     file = file .. substituted_file_name .. ".norg"
                 end
-                local link = norg_link .. "[" .. file_metadata.title .. "]"
-                vim.print({ f = file, l = link })
+                local link = norg_link .. "[" .. title .. "]"
                 module.private.capture_link_buffer.link = link
                 vim.cmd("e " .. file)
                 -- put cursor at the end of metadata.
@@ -203,14 +279,26 @@ module.public = {
                 else
                     vim.cmd("Neorg inject-metadata")
                 end
-                -- search for the end of the metadata tag.
-                --
-                local end_row = module.private.get_meta_range(0)[3] + 1
+
+                local end_row = module.private.get_meta_range(0)[3] + 2
                 if end_row == nil then
                     error("ERROR WITH TREESITTER METADATA QUERY")
                 end
                 vim.cmd(string.format(":call cursor(%d,0)", end_row))
-                vim.api.nvim_put(module.private.get_template_lines(template), "l", true, true)
+                local metadata = module.required["core.integrations.treesitter"].get_document_metadata()
+                metadata.title = title
+                local lines = module.private.get_template_lines(template, metadata)
+
+                -- if the file doesn't already exist, update the title
+                if not file_exists and template.title ~= nil then
+                    -- replace the metadata title with the title param instead of using file name.
+                    local meta_title = module.private.substitute(template.title, { title = title })
+                    module.private.update_metadata_title(meta_title, module.private.capture_buffer)
+                end
+                vim.api.nvim_put(lines, "c", false, true)
+                vim.cmd("normal a")
+
+                module.config.private.temporary_substitutions = {}
             end)
             module.private.register_buffer_for_capture_link_keymaps(vim.api.nvim_win_get_buf(buf_win[2]))
         end

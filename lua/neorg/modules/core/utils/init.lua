@@ -1,5 +1,4 @@
 local M = {}
-
 M.create_capture_window = function()
     local buf = vim.api.nvim_create_buf(true, false)
     vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
