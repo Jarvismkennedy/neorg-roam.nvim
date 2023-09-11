@@ -114,3 +114,7 @@ version: 1.1.1
    - Implement back links.
    - Other types of linkables.
    - Write tests.
+   - Insert links is broken when inserting link to a file in a different root directory.
+   - Moving files around / renaming them should not break links.
+
+

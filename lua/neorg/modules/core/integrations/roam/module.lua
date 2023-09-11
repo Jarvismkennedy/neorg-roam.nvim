@@ -182,7 +182,7 @@ module.public = {
     end,
     capture_index = function()
         local curr_wksp = module.required["core.dirman"].get_current_workspace()[2]
-        module.required["core.integrations.roam.capture"].capture_note(curr_wksp .. "/index.norg")
+        module.required["core.integrations.roam.capture"].capture_note("index")
     end,
     insert_link = function()
         local wksp_files = module.private.get_files()
