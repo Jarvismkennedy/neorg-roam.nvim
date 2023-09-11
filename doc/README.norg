@@ -4,7 +4,7 @@ description: neorgroam readme file.
 authors: jarviskennedy
 categories: 
 created: 2023-09-07T23:26:01-0500
-updated: 2023-09-07T23:45:02-0500
+updated: 2023-09-11
 version: 1.1.1
 @end
 
@@ -12,9 +12,9 @@ version: 1.1.1
   Like org-roam. But for Neorg. 
 
 ** Install
-   Install with packer
+   Install with your plugin manager. Here is an example with packer.
    @code lua 
-   use({"jarvismkennedy/neorgroam.nvim", 
+   use({"jarvismkennedy/neorg-roam.nvim", 
 	   requires = { 
 		   "nvim-telescope/telescope.nvim", 
 		   "nvim-lua/plenary.nvim"
@@ -77,7 +77,7 @@ version: 1.1.1
    Capture templates are defined as a list in the roam config table.
    @code lua	
    {
-	   name = "CS new note",
+	   name = "new computer science note",
 	   file = "classes/computer_science/${title}_${date}",
 	   title = "${title}"
 	   lines = { "","* ${heading1}", "" },
@@ -88,7 +88,8 @@ version: 1.1.1
    metadata table currently only supports the `title` field. The builtin substitutions are
    `${title}`, and `${date}` as above. The `${title}` substitution is the `@document.meta` title if the file exists already,
    or the telescope prompt if it does not exist. The file and title fields are only updated when
-   capturing a new file.
+   capturing a new file. In the above example, if you don't override the `title` field then it will
+   default to the filename which is `${title}_${date}`.
 
 *** Capture template fields
 	- *name:* identifier for the template 
@@ -98,7 +99,7 @@ version: 1.1.1
 
 *** Capture templates to do
 	- ( ) Currently capture templates always insert after the metadata. Support a target property to
-	   insert after any treesitter node.
+	   insert after any tree-sitter node.
 	- ( ) Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
 
 ** currently implemented features
