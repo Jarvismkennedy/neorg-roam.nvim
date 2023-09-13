@@ -12,7 +12,7 @@ M.reload = function()
             ["core.defaults"] = {}, -- Loads default behaviour
             ["core.concealer"] = {
                 config = {
-                    icon_preset = "varied",
+                    icon_preset = "basic",
                 },
             }, -- Adds pretty icons to your documents
             ["core.export"] = {},
