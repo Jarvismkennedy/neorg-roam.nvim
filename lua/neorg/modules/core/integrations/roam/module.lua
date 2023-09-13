@@ -197,5 +197,5 @@ module.public = {
     db_sync_workspace = function(wksp) end,
 }
 
-vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")
+--vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")
 return module
