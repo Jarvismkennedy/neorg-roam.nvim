@@ -153,7 +153,6 @@ module.private = {
 
         local curr_wksp = dirman.get_current_workspace()
         local files = dirman.get_norg_files(curr_wksp[1])
-        vim.print(curr_wksp)
         return { curr_wksp, files }
     end,
 }
@@ -194,7 +193,6 @@ module.public = {
     end,
     get_back_links = function() end,
     db_sync = function() end,
-    db_sync_workspace = function(wksp) end,
 }
 
 --vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")

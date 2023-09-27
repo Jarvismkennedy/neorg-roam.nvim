@@ -4,7 +4,7 @@ description:
 authors: jarviskennedy
 categories: 
 created: 2023-08-30
-updated: 2023-09-11
+updated: 2023-09-27T11:22:53-0500
 version: 1.1.1
 @end
 
@@ -12,16 +12,48 @@ version: 1.1.1
   - (x) Separate capture logic into its on module.
   - ( ) Write test cases for all functions so that you know when you mess something up.
   - (x) Refactor the picker logic. 
-  - ( ) Add workspace keymaps, i.e. Capture to workspace, find note in workspace, etc. Just add `w`
-		after commands to prompt for a workspace name. I.e. `<leader>nfw` should prompt for a workspace
-		to search through. How should this work for links though? I think you should only be able to
-		link within the current workspace?
   - (x) Capture templates
   - ( ) SQL module 
   - ( ) Back links (super important)
   - ( ) Tags ?
   - ( ) Other types of linkables.
 
+
+* Metadata 
+  - Need to implement your own "metagen" module to have custom metadata.
+  - Should include: 
+  -- title
+  -- uuid
+  -- created at 
+  -- updated at 
+  -- The rest should be from capture templates.
+* Links
+  - Links should include workspace like `{:$personal/index:}[personal index]` so that linking to
+	other workspaces works properly
+  - How can we make renaming files not break links? I guess just from the renamed file run neorg-roam update
+	links... but you shouldnt need to do this.
+* SQLite
+  - Implement a db per workspace, require listing the roam workspaces in config. default to the `roam` wksp.
+** Schemas
+*** Notes table
+	@table
+	| id            | filepath (for opening files) | workspacepath (for inserting links) | title           |
+	| ------------- | ----------------             | -----------------                   | --              |
+	| int not null  | string not null              | string not null                     | string not null |
+	@end
+
+*** Back Links 
+	@table
+	| source_id      | target_id      | href                                    | lin                |
+	| ---            | ---            | --------                                | ---                |
+	| FK to notes.Id | FK to notes.Id | string  e.g. `{:$wrkspc/path/to/link:}` | `{:path/to/link:}` |
+	@end
+
+** thoughts
+   - How should we update links if filename/location changes? I think just run a command from the
+	 file which was changed to search for backlinks using uuid, then use treesitter to update the
+	 link path in those files.
+   - Need to db-sync to generate the db from files. Take a look at org-roam to see how they implement db-syncing.
 
 * Capture templates
   - Improvements to capture templates.
