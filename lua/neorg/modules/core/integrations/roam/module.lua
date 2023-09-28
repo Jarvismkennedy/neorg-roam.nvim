@@ -41,7 +41,7 @@ module.load = function()
 end
 module.config.public = {
     keymaps = {
-        select_prompt = "<C-n>",
+        select_prompt = "<C-Space>",
         insert_link = "<leader>ni",
         find_note = "<leader>nf",
         capture_note = "<leader>nc",

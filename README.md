@@ -38,7 +38,7 @@ require("neorg").setup({
 	   keymaps = {
 		   -- select_prompt is used to to create new note / capture from the prompt directly
 		   -- instead of the telescope choice.
-		   select_prompt = "<C-n>",
+		   select_prompt = "<C-Space>",
 		   insert_link = "<leader>ni",
 		   find_note = "<leader>nf",
 		   capture_note = "<leader>nc",
@@ -121,3 +121,7 @@ default to the filename which is `${title}_${date}`.
 - Implement back links.
 - Other types of linkables.
 - Write tests.
+- Insert links is broken when inserting link to a file in a different root directory.
+- Moving files around / renaming them should not break links.
+
+
