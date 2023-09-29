@@ -4,7 +4,7 @@ description:
 authors: jarviskennedy
 categories: 
 created: 2023-08-30
-updated: 2023-09-27T11:22:53-0500
+updated: 2023-09-28T21:43:17-0500
 version: 1.1.1
 @end
 
@@ -33,7 +33,13 @@ version: 1.1.1
   - How can we make renaming files not break links? I guess just from the renamed file run neorg-roam update
 	links... but you shouldnt need to do this.
 * SQLite
-  - Implement a db per workspace, require listing the roam workspaces in config. default to the `roam` wksp.
+** To do 
+   - make it its own neorg module.
+   - find out how to create indexes for searching, look at zk for knowing what needs to be indexed.    
+   - implement the sync functionality and test if it is faster to read from the db then to use
+	 dirman. Its probably not, but definitely faster than reading all the files to get the metadata
+   - generate uuid per file, and use it in the notes table, and insert in metadata.
+   - anything else?
 ** Schemas
 *** Notes table
 	@table
@@ -57,5 +63,6 @@ version: 1.1.1
 
 * Capture templates
   - Improvements to capture templates.
+  - Add metadata template to capture templates.
   - Insert after any tree sitter node. - Then make a capture template example which will let you
 	choose which heading to insert after.

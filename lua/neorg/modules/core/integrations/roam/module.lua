@@ -1,8 +1,12 @@
 local neorg = require("neorg.core")
 local utils = require("neorg.modules.core.utils")
 local module = neorg.modules.create("core.integrations.roam")
+local db = require'neorg.modules.core.sql.roam_db'
+
 module.config = {}
 module.setup = function()
+	db.init()
+	db.sync()
     return {
         success = true,
         requires = {

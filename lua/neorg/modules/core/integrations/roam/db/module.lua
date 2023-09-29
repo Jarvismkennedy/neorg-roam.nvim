@@ -1,8 +1,10 @@
 local sqlite = require("sqlite")
+local neorg = require("neorg.core")
+local neorg_utils = require("neorg.core.utils")
 
-local db = {}
+local db = neorg.modules.create("core.integrations.roam.db")
 
-db.init = function()
+db.setup = function()
 	db.notes = sqlite.tbl("notes", {
 		id = true,
 		path = { type = "text", required = true, unique = true },
@@ -24,11 +26,23 @@ db.init = function()
 			on_update = "cascade",
 		},
 	})
-	local db_path = vim.fn.stdpath("data") .. "roam.db"
+	local db_path = vim.fn.stdpath("data") .. "/roam.db"
 	sqlite({ uri = db_path, notes = db.notes, links = db.links })
+	return {
+		success = true,
+		require = {
+			"core.dirman",
+			"core.integrations.treesitter"
+		}
+	}
 end
 
-db.sync = function(wksps) end
+db.sync = function(wksps)
+
+	db.notes:insert({
+		{ path = "test", workspace = "$another_test", title = "a test title" },
+	})
+end
 
 db.sync_wksp = function(wksp) end
 
@@ -40,4 +54,4 @@ db.insert_note = function(note_data) end
 
 db.insert_link = function(link_data) end
 
-return db
+
