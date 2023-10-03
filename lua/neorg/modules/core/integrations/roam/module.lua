@@ -199,6 +199,7 @@ module.public = {
     end,
     get_back_links = function() end,
     db_sync = function()
+		vim.print("TESTING")
 		module.required["core.integrations.roam.db"].sync()
 	end,
 }
