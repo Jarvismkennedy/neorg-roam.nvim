@@ -1,6 +1,5 @@
 local sqlite = require("sqlite")
 local neorg = require("neorg.core")
-local neorg_utils = require("neorg.core.utils")
 
 local db = neorg.modules.create("core.integrations.roam.db")
 
@@ -30,28 +29,36 @@ db.setup = function()
 	sqlite({ uri = db_path, notes = db.notes, links = db.links })
 	return {
 		success = true,
-		require = {
+		requires = {
 			"core.dirman",
-			"core.integrations.treesitter"
-		}
+			"core.integrations.treesitter",
+		},
 	}
 end
+db.public = {
+	sync = function()
+		local wkspaces = db.required["core.dirman"].get_workspace_names()
+		-- start with just the roam db and see what happens.
+		local wksp_files = db.required["core.dirman"].get_norg_files("roam")
+		for i, file in ipairs(wksp_files) do
+			local bufnr = vim.api.nvim_create_buf(true, false)
+			vim.api.nvim_buf_set_name(bufnr, file)
+			vim.api.nvim_buf_call(bufnr, vim.cmd.edit)
+			local metadata = db.required["core.integrations.treesitter"].get_document_metadata(bufnr)
+			vim.print(metadata)
+			end
+		vim.print(wksp_files)
+	end,
 
-db.sync = function(wksps)
+	sync_wksp = function(wksp) end,
 
-	db.notes:insert({
-		{ path = "test", workspace = "$another_test", title = "a test title" },
-	})
-end
+	get_notes = function(wksp) end,
 
-db.sync_wksp = function(wksp) end
+	get_backlinks = function(id) end,
 
-db.get_notes = function(wksp) end
+	insert_note = function(note_data) end,
 
-db.get_backlinks = function(id) end
+	insert_link = function(link_data) end,
+}
 
-db.insert_note = function(note_data) end
-
-db.insert_link = function(link_data) end
-
-
+return db

@@ -1,12 +1,11 @@
 local neorg = require("neorg.core")
 local utils = require("neorg.modules.core.utils")
 local module = neorg.modules.create("core.integrations.roam")
-local db = require'neorg.modules.core.sql.roam_db'
+-- local db = require'neorg.modules.core.sql.roam_db'
 
 module.config = {}
 module.setup = function()
-	db.init()
-	db.sync()
+
     return {
         success = true,
         requires = {
@@ -14,6 +13,7 @@ module.setup = function()
             "core.dirman",
             "core.esupports.metagen",
             "core.integrations.roam.capture",
+			"core.integrations.roam.db",
         },
     }
 end
@@ -22,6 +22,7 @@ module.neorg_post_load = function()
     vim.keymap.set("n", module.config.public.keymaps.find_note, module.public.find_note)
     vim.keymap.set("n", module.config.public.keymaps.capture_note, module.public.capture_note)
     vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
+	vim.keymap.set("n", module.config.public.keymaps.db_sync, module.public.db_sync)
 end
 module.load = function()
     -- pass config to capture module.
@@ -52,6 +53,7 @@ module.config.public = {
         capture_index = "<leader>nci",
         capture_cancel = "<C-q>",
         capture_save = "<C-w>",
+		db_sync = "<leader>nds",
     },
     capture_templates = {
         {
@@ -196,7 +198,9 @@ module.public = {
         picker:find()
     end,
     get_back_links = function() end,
-    db_sync = function() end,
+    db_sync = function()
+		module.required["core.integrations.roam.db"].sync()
+	end,
 }
 
 --vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")
