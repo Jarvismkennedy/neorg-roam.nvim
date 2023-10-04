@@ -11,7 +11,7 @@ module.setup = function()
         requires = {
             "core.keybinds",
             "core.dirman",
-            "core.esupports.metagen",
+            "core.integrations.roam.meta",
             "core.integrations.roam.capture",
 			"core.integrations.roam.db",
         },
@@ -90,12 +90,7 @@ module.config.private = {
         else
             vim.cmd("e " .. file_path)
             local buf = vim.api.nvim_get_current_buf()
-            local metadata_present = module.required["core.esupports.metagen"].is_metadata_present(buf)
-            if metadata_present then
-                vim.cmd("Neorg update-metadata")
-            else
-                vim.cmd("Neorg inject-metadata")
-            end
+			module.required["core.integrations.roam.meta"].update_or_inject_metadata(buf)
         end
     end,
     capture_note = function(prompt, selection)
@@ -199,7 +194,6 @@ module.public = {
     end,
     get_back_links = function() end,
     db_sync = function()
-		vim.print("TESTING")
 		module.required["core.integrations.roam.db"].sync()
 	end,
 }

@@ -31,7 +31,8 @@ db.setup = function()
 		success = true,
 		requires = {
 			"core.dirman",
-			"core.integrations.treesitter",
+			"core.integrations.roam.treesitter",
+			"core.integrations.roam.meta",
 		},
 	}
 end
@@ -42,13 +43,19 @@ db.public = {
 		-- start with just the roam db and see what happens.
 		local wksp_files = db.required["core.dirman"].get_norg_files("roam")
 		local bufnr = vim.api.nvim_create_buf(true, false)
-		for i, file in ipairs(wksp_files) do
+		for _, file in ipairs(wksp_files) do
 			vim.api.nvim_buf_set_name(bufnr, file)
 			vim.api.nvim_buf_call(bufnr, vim.cmd.edit)
-			local metadata = db.required["core.integrations.treesitter"].get_document_metadata(bufnr)
+			local metadata = db.required["core.integrations.roam.meta"].get_document_metadata(bufnr)
+			if metadata == nil or metadata.id == nil then
+				metadata = db.required["core.integrations.roam.meta"].inject_metadata(bufnr, true, nil)
+				vim.api.nvim_buf_call(bufnr, function()
+					vim.cmd([[write]])
+				end)
+			end
 			vim.print({ buf = bufnr, meta = metadata })
 		end
-		vim.api.nvim_buf_delete(bufnr,{})
+		vim.api.nvim_buf_delete(bufnr, {})
 	end,
 
 	sync_wksp = function(wksp) end,

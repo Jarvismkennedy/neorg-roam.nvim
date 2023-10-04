@@ -4,7 +4,7 @@ description:
 authors: jarviskennedy
 categories: 
 created: 2023-08-30
-updated: 2023-09-28T21:43:17-0500
+updated: 2023-10-04T00:02:07-0500
 version: 1.1.1
 @end
 
@@ -20,13 +20,10 @@ version: 1.1.1
 
 
 * Metadata 
-  - Need to implement your own "metagen" module to have custom metadata.
-  - Should include: 
-  -- title
-  -- uuid
-  -- created at 
-  -- updated at 
-  -- The rest should be from capture templates.
+  - inject / update metadata
+  - capture templates metadata template
+  - change templates to ipairs instead of pairs for guaranteed ordering.
+
 * Links
   - Links should include workspace like `{:$personal/index:}[personal index]` so that linking to
 	other workspaces works properly
