@@ -1,13 +1,9 @@
 @document.meta
-title: Dev notes.
-description: 
-authors: jarviskennedy
-categories: 
-created: 2023-08-30
-updated: 2023-10-04T12:18:05-0500
-version: 1.1.1
+title: todo
+id: 3fd8ebf6-ac2a-4c06-b4ce-030729974216
+created: 2023-10-05T10:02:20-0500
+updated: 2023-10-05T10:02:20-0500
 @end
-
 * To Dos
   - (x) Separate capture logic into its on module.
   - ( ) Write test cases for all functions so that you know when you mess something up.

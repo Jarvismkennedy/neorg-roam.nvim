@@ -1,12 +1,28 @@
 local sqlite = require("sqlite")
 local neorg = require("neorg.core")
 local db = neorg.modules.create("core.integrations.roam.db")
-local function extract_values(tbl)
+-- Hacky workaround because sqlite.lua doesn't escape everything correctly, so it passes strings
+-- with () as functions
+local escape = function(content)
+	return string.format("__ESCAPED__'%s'", content)
+end
+
+local unescape = function(content)
+	return content:gsub("^__ESCAPED__'(.*)'$", "%1")
+end
+local process_note = function(note_tbl, fn)
+	for key, val in pairs(note_tbl) do
+		if key ~= "id" then
+			note_tbl[key] = fn(val)
+		end
+	end
+	return note_tbl
+end
+local function process_notes_for_db_sync(tbl)
 	local t = {}
 	for k, v in pairs(tbl) do
-		table.insert(t, v)
+		table.insert(t, process_note(v, escape))
 	end
-	vim.print(t)
 	return t
 end
 local function starts_with(str, start)
@@ -23,7 +39,6 @@ local function generate_links_entries(links, notes_entries)
 		table.insert(entries, { source = from_note.id, target = to_note.id })
 		::continue::
 	end
-	vim.print(entries)
 	return entries
 end
 local function get_or_generate_metadata(file, bufnr)
@@ -96,13 +111,12 @@ db.private = {
 			)
 			return false
 		end
-		ok,_  = pcall(db.private.init)
+		ok, _ = pcall(db.private.init)
 		if not ok then
 			vim.notify(
 				"Neorg-roam db_sync error: Failed to initialize db file at " .. db.config.private.db_path,
 				vim.log.levels.ERROR
 			)
-			vim.print(err)
 			return false
 		end
 		return true
@@ -115,29 +129,34 @@ db.public = {
 			return nil
 		end
 		-- start with roam workspace, add support for other workspaces later.
-		local wksp = db.required["core.dirman"].get_workspace("roam")
-		local wksp_files = db.required["core.dirman"].get_norg_files("roam")
-		local bufnr = vim.api.nvim_create_buf(false, false)
+		local wkspaces = db.required["core.dirman"].get_workspace_names()
 		local notes_entries = {}
 		local links = {}
-		for _, file in ipairs(wksp_files) do
-			local metadata = get_or_generate_metadata(file, bufnr)
-			notes_entries[file] = { path = file, id = metadata.id, workspace = "roam", title = metadata.title }
-			local nodes = db.required["core.integrations.roam.treesitter"].get_norg_links(bufnr)
-			for i, node in ipairs(nodes) do
-				local expand = ""
-				if starts_with(node, "$") then
-					expand = db.required["core.dirman.utils"].expand_path(node)
-				else
-					expand = wksp .. "/" .. node .. ".norg"
+		local bufnr = vim.api.nvim_create_buf(true, false)
+		local curr_wksp = db.required["core.dirman"].get_current_workspace()[1]
+		for _, wksp_name in ipairs(wkspaces) do
+			db.required["core.dirman"].set_workspace(wksp_name)
+			local wksp = db.required["core.dirman"].get_workspace(wksp_name)
+			local wksp_files = db.required["core.dirman"].get_norg_files(wksp_name)
+			for _, file in ipairs(wksp_files) do
+				local metadata = get_or_generate_metadata(file, bufnr)
+				notes_entries[file] = { path = file, id = metadata.id, workspace = wksp_name, title = metadata.title }
+				local nodes = db.required["core.integrations.roam.treesitter"].get_norg_links(bufnr)
+				for _, node in ipairs(nodes) do
+					local expand = ""
+					if starts_with(node, "$") then
+						expand = db.required["core.dirman.utils"].expand_path(node)
+					else
+						expand = wksp .. "/" .. node .. ".norg"
+					end
+					table.insert(links, { from = file, to = expand })
 				end
-				table.insert(links, { from = file, to = expand })
 			end
 		end
 		vim.api.nvim_buf_delete(bufnr, {})
+		db.required["core.dirman"].set_workspace(curr_wksp)
 		local links_entries = generate_links_entries(links, notes_entries)
-
-		db.notes:insert(extract_values(notes_entries))
+		db.notes:insert(process_notes_for_db_sync(notes_entries))
 		db.links:insert(links_entries)
 	end,
 
