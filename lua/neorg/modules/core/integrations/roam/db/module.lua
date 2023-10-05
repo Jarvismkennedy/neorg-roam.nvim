@@ -2,7 +2,9 @@ local sqlite = require("sqlite")
 local neorg = require("neorg.core")
 
 local db = neorg.modules.create("core.integrations.roam.db")
-
+local function starts_with(str, start)
+	return str:sub(1, #start) == start
+end
 db.setup = function()
 	db.notes = sqlite.tbl("notes", {
 		id = true,
@@ -31,6 +33,7 @@ db.setup = function()
 		success = true,
 		requires = {
 			"core.dirman",
+			"core.dirman.utils",
 			"core.integrations.roam.treesitter",
 			"core.integrations.roam.meta",
 		},
@@ -38,11 +41,12 @@ db.setup = function()
 end
 db.public = {
 	sync = function()
-		local wkspaces = db.required["core.dirman"].get_workspace_names()
-
-		-- start with just the roam db and see what happens.
+		-- start with roam workspace, add support for other workspaces later.
+		local wksp = db.required["core.dirman"].get_workspace("roam")
 		local wksp_files = db.required["core.dirman"].get_norg_files("roam")
 		local bufnr = vim.api.nvim_create_buf(true, false)
+		local notes_entries = {}
+		local links = {}
 		for _, file in ipairs(wksp_files) do
 			vim.api.nvim_buf_set_name(bufnr, file)
 			vim.api.nvim_buf_call(bufnr, vim.cmd.edit)
@@ -53,8 +57,16 @@ db.public = {
 					vim.cmd([[write]])
 				end)
 			end
-			vim.print({ buf = bufnr, meta = metadata })
+			notes_entries[file] = { path = file, id = metadata.id, workspace = "roam", title = metadata.title }
+			local nodes = db.required["core.integrations.roam.treesitter"].get_norg_links(bufnr)
+			vim.print(nodes)
+			if nodes ~= nil and #nodes > 0 then
+				for i, node in ipairs(nodes) do
+					table.insert(links, { from = file, to = db.required["core.dirman.utils"].expand_path(node) })
+				end
+			end
 		end
+		vim.print(links)
 		vim.api.nvim_buf_delete(bufnr, {})
 	end,
 

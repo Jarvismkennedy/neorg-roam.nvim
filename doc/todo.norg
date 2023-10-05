@@ -4,7 +4,7 @@ description:
 authors: jarviskennedy
 categories: 
 created: 2023-08-30
-updated: 2023-10-04T00:02:07-0500
+updated: 2023-10-04T12:18:05-0500
 version: 1.1.1
 @end
 
@@ -31,12 +31,12 @@ version: 1.1.1
 	links... but you shouldnt need to do this.
 * SQLite
 ** To do 
-   - make it its own neorg module.
    - find out how to create indexes for searching, look at zk for knowing what needs to be indexed.    
-   - implement the sync functionality and test if it is faster to read from the db then to use
-	 dirman. Its probably not, but definitely faster than reading all the files to get the metadata
-   - generate uuid per file, and use it in the notes table, and insert in metadata.
-   - anything else?
+   - Links not parsing correctly when like `{:$/path:}`, it is using "$" as cwd rather than current
+	 workspace?
+   - only generate one link for each to-from file pair.
+   - support multiple workspaces instead of just "roam" workspace.
+
 ** Schemas
 *** Notes table
 	@table
