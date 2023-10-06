@@ -12,7 +12,7 @@ local unescape = function(content)
 end
 local process_note = function(note_tbl, fn)
 	for key, val in pairs(note_tbl) do
-		if key ~= "id" then
+		if key ~= "id" and key ~= "workspace" then
 			note_tbl[key] = fn(val)
 		end
 	end
@@ -91,7 +91,7 @@ db.private = {
 				on_update = "cascade",
 			},
 		})
-		sqlite({ uri = db.config.private.db_path, notes = db.notes, links = db.links })
+		db.sql = sqlite({ uri = db.config.private.db_path, notes = db.notes, links = db.links })
 	end,
 	clean_db_file = function()
 		-- first close all open neorg buffers
@@ -158,9 +158,17 @@ db.public = {
 		local links_entries = generate_links_entries(links, notes_entries)
 		db.notes:insert(process_notes_for_db_sync(notes_entries))
 		db.links:insert(links_entries)
+		vim.notify("Neorg-roam: regenerated db file.", vim.log.levels.INFO)
 	end,
 
-	sync_wksp = function(wksp) end,
+	sync_wksp = function(wksp)
+		local results = {}
+		db.sql:with_open(function()
+			results =
+				db.sql:eval("select * from notes join links on notes.id = links.source where notes.workspace = ?", wksp)
+		end)
+		vim.print(results)
+	end,
 
 	get_notes = function(wksp) end,
 

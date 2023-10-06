@@ -23,6 +23,7 @@ module.neorg_post_load = function()
     vim.keymap.set("n", module.config.public.keymaps.capture_note, module.public.capture_note)
     vim.keymap.set("n", module.config.public.keymaps.capture_index, module.public.capture_index)
 	vim.keymap.set("n", module.config.public.keymaps.db_sync, module.public.db_sync)
+	vim.keymap.set("n", module.config.public.keymaps.db_sync_wksp, module.public.db_sync_wksp)
 end
 module.load = function()
     -- pass config to capture module.
@@ -53,7 +54,8 @@ module.config.public = {
         capture_index = "<leader>nci",
         capture_cancel = "<C-q>",
         capture_save = "<C-w>",
-		db_sync = "<leader>nds",
+		db_sync = "<leader>nsd",
+		db_sync_wksp = "<leader>nsw",
     },
     capture_templates = {
         {
@@ -196,6 +198,12 @@ module.public = {
     db_sync = function()
 		module.required["core.integrations.roam.db"].sync()
 	end,
+	db_sync_wksp = function()
+		local wkspaces = module.required["core.dirman"].get_workspace_names()
+		local wksp = vim.ui.select(wkspaces,{prompt="Sync Workspace: "}, function(choice) 
+			module.required["core.integrations.roam.db"].sync_wksp(choice)
+		end)
+	end
 }
 
 --vim.keymap.set("n", "<leader>hrr", ":lua require('dev').reload()<CR>")

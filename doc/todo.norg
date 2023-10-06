@@ -2,7 +2,7 @@
 title: todo
 id: 3fd8ebf6-ac2a-4c06-b4ce-030729974216
 created: 2023-10-05T10:02:20-0500
-updated: 2023-10-05T10:02:20-0500
+updated: 2023-10-06T11:15:50-0500
 @end
 * To Dos
   - (x) Separate capture logic into its on module.
@@ -27,11 +27,12 @@ updated: 2023-10-05T10:02:20-0500
 	links... but you shouldnt need to do this.
 * SQLite
 ** To do 
-   - find out how to create indexes for searching, look at zk for knowing what needs to be indexed.    
-   - Links not parsing correctly when like `{:$/path:}`, it is using "$" as cwd rather than current
-	 workspace?
+   - sync workspace
+   - backlinks
+   - get notes
+   - update links on title / file path change
+   - generate indexes
    - only generate one link for each to-from file pair.
-   - support multiple workspaces instead of just "roam" workspace.
 
 ** Schemas
 *** Notes table
