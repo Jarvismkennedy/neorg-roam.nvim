@@ -1,6 +1,15 @@
 local neorg = require("neorg.core")
 
 local treesitter = neorg.modules.create("core.integrations.roam.treesitter")
+local function has_value (tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
+end
 
 treesitter.setup = function()
 	return {
@@ -29,7 +38,10 @@ treesitter.public = {
 		treesitter.required["core.integrations.treesitter"].execute_query(
 			treesitter.config.private.link_query,
 			function(query, id, node, metadata)
-				table.insert(nodes, treesitter.required["core.integrations.treesitter"].get_node_text(node,bufnr))
+				local v = treesitter.required["core.integrations.treesitter"].get_node_text(node,bufnr)
+				if not has_value(nodes, v) then
+					table.insert(nodes, v)
+				end
 			end,
 			bufnr,
 			0,

@@ -6,9 +6,16 @@ local db = neorg.modules.create("core.integrations.roam.db")
 local escape = function(content)
 	return string.format("__ESCAPED__'%s'", content)
 end
-
 local unescape = function(content)
 	return content:gsub("^__ESCAPED__'(.*)'$", "%1")
+end
+local link_exists = function(from, to, t)
+	for index, value in ipairs(t) do
+		if value.source == from and value.target == to then
+			return true
+		end
+	end
+	return false
 end
 local process_note = function(note_tbl, fn)
 	for key, val in pairs(note_tbl) do
@@ -33,7 +40,7 @@ local function generate_links_entries(links, notes_entries)
 	for i, link in ipairs(links) do
 		local from_note = notes_entries[link.from]
 		local to_note = notes_entries[link.to]
-		if from_note == nil or to_note == nil then
+		if from_note == nil or to_note == nil or link_exists(from_note.id, to_note.id, entries) then
 			goto continue
 		end
 		table.insert(entries, { source = from_note.id, target = to_note.id })
