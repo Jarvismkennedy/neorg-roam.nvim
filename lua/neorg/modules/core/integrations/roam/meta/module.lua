@@ -121,9 +121,9 @@ meta.public = {
 		if not present or force then
 			template = template and join_templates(template, meta.config.private.default_template)
 				or meta.config.private.default_template
-			local lines, meta = meta.private.create_metadata(buf, template)
+			local lines, metadata = meta.private.create_metadata(buf, template)
 			vim.api.nvim_buf_set_lines(buf, user_data.range[1], user_data.range[2], false, lines)
-			return meta
+			return metadata
 		end
 	end,
 	get_document_metadata = function(buf)
