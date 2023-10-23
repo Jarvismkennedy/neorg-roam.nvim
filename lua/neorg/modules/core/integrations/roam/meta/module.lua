@@ -33,18 +33,27 @@ end
 local join_templates = function(t1, t2)
 	local merged = {}
 	local t1_map = {}
-	for i, v in ipairs(t1) do
-		t1_map[v[1]] = v
+	local metatable = getmetatable(t1)
+	if metatable and metatable.__is_obj then
+		t1_map = t1
+		for k, v in pairs(t1) do
+			table.insert(merged, { k, v })
+		end
+	else
+		merged = t1
+		for i, v in ipairs(t1) do
+			t1_map[v[1]] = v
+		end
 	end
 	for i, v in ipairs(t2) do
 		local key = v[1]
+		vim.print(key, t1_map[key])
 		if t1_map[key] == nil then
 			table.insert(merged, v)
-		else
-			table.insert(merged, t1_map[key])
-			t1_map[key] = nil
 		end
 	end
+	vim.print(merged)
+	return merged
 end
 meta.setup = function()
 	return {
@@ -76,15 +85,24 @@ meta.config.private = {
 }
 meta.private = {
 	create_metadata = function(buf, template)
+		vim.print(template)
 		local lines = { "@document.meta" }
+		local t = {}
 		for i, v in ipairs(template) do
-			if type(v[2]) ~= "function" then
+			if type(v[2]) == "string" then
+				local val = v[2]
+				table.insert(lines, string.format("%s: %s", v[1], val))
+				t[v[1]] = val
+			elseif type(v[2]) == "function" then
+				local val = v[2](buf)
+				table.insert(lines, string.format("%s: %s", v[1], val))
+				t[v[1]] = val
+			else
 				error("neorg roam meta template must be function, found " .. type(v[2]) .. " at index " .. i)
 			end
-			table.insert(lines, string.format("%s: %s", v[1], v[2](buf)))
 		end
 		table.insert(lines, "@end")
-		return lines
+		return lines, t
 	end,
 	insert_metadata = function(buf, lines, start_row, end_row) end,
 }
@@ -103,9 +121,9 @@ meta.public = {
 		if not present or force then
 			template = template and join_templates(template, meta.config.private.default_template)
 				or meta.config.private.default_template
-			local metadata = meta.private.create_metadata(buf, template)
-			vim.api.nvim_buf_set_lines(buf, user_data.range[1], user_data.range[2], false, metadata)
-			return metadata
+			local lines, meta = meta.private.create_metadata(buf, template)
+			vim.api.nvim_buf_set_lines(buf, user_data.range[1], user_data.range[2], false, lines)
+			return meta
 		end
 	end,
 	get_document_metadata = function(buf)

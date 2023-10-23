@@ -48,12 +48,14 @@ local function generate_links_entries(links, notes_entries)
 	end
 	return entries
 end
-local function get_or_generate_metadata(file, bufnr)
-	vim.api.nvim_buf_set_name(bufnr, file)
+local function get_or_generate_metadata(bufnr)
 	vim.api.nvim_buf_call(bufnr, vim.cmd.edit)
 	local metadata = db.required["core.integrations.roam.meta"].get_document_metadata(bufnr)
 	if metadata == nil or metadata.id == nil then
-		metadata = db.required["core.integrations.roam.meta"].inject_metadata(bufnr, true, nil)
+		if metadata ~= nil then
+			setmetatable(metadata,{__is_obj = true})
+		end
+		metadata = db.required["core.integrations.roam.meta"].inject_metadata(bufnr, true, metadata)
 		vim.api.nvim_buf_call(bufnr, function()
 			vim.cmd([[write]])
 		end)
@@ -128,6 +130,17 @@ db.private = {
 		end
 		return true
 	end,
+	clean_wksp = function(wksp)
+		local ids = {}
+		db.sql:with_open(function()
+			local r = db.sql:eval("select id from notes where workspace = ?", wksp)
+			for _, value in ipairs(r) do
+				table.insert(ids, value.id)
+			end
+		end)
+		db.notes:remove({ id = ids })
+		db.links:remove({ source = ids })
+	end,
 }
 db.public = {
 	sync = function()
@@ -139,16 +152,18 @@ db.public = {
 		local wkspaces = db.required["core.dirman"].get_workspace_names()
 		local notes_entries = {}
 		local links = {}
-		local bufnr = vim.api.nvim_create_buf(true, false)
 		local curr_wksp = db.required["core.dirman"].get_current_workspace()[1]
 		for _, wksp_name in ipairs(wkspaces) do
 			db.required["core.dirman"].set_workspace(wksp_name)
 			local wksp = db.required["core.dirman"].get_workspace(wksp_name)
 			local wksp_files = db.required["core.dirman"].get_norg_files(wksp_name)
 			for _, file in ipairs(wksp_files) do
-				local metadata = get_or_generate_metadata(file, bufnr)
+				local bufnr = vim.api.nvim_create_buf(true, false)
+				vim.api.nvim_buf_set_name(bufnr, file)
+				local metadata = get_or_generate_metadata(bufnr)
 				notes_entries[file] = { path = file, id = metadata.id, workspace = wksp_name, title = metadata.title }
 				local nodes = db.required["core.integrations.roam.treesitter"].get_norg_links(bufnr)
+				vim.api.nvim_buf_delete(bufnr, {})
 				for _, node in ipairs(nodes) do
 					local expand = ""
 					if starts_with(node, "$") then
@@ -160,26 +175,69 @@ db.public = {
 				end
 			end
 		end
+		db.required["core.dirman"].set_workspace(curr_wksp)
+		local links_entries = generate_links_entries(links, notes_entries)
+		db.notes:insert(process_notes_for_db_sync(notes_entries))
+		db.links:insert(links_entries)
+		vim.notify("Neorg-roam: synced db file.", vim.log.levels.INFO)
+	end,
+
+	sync_wksp = function(wksp_name)
+		local notes_entries = {}
+		local links = {}
+		local curr_wksp = db.required["core.dirman"].get_current_workspace()[1]
+		db.private.clean_wksp(wksp_name)
+		db.required["core.dirman"].set_workspace(wksp_name)
+		local wksp = db.required["core.dirman"].get_workspace(wksp_name)
+		local wksp_files = db.required["core.dirman"].get_norg_files(wksp_name)
+		local bufnr = vim.api.nvim_create_buf(true, false)
+		for _, file in ipairs(wksp_files) do
+			local metadata = get_or_generate_metadata(file, bufnr)
+			notes_entries[file] = { path = file, id = metadata.id, workspace = wksp_name, title = metadata.title }
+			local nodes = db.required["core.integrations.roam.treesitter"].get_norg_links(bufnr)
+			for _, node in ipairs(nodes) do
+				local expand = ""
+				if starts_with(node, "$") then
+					expand = db.required["core.dirman.utils"].expand_path(node)
+				else
+					expand = wksp .. "/" .. node .. ".norg"
+				end
+				table.insert(links, { from = file, to = expand })
+			end
+		end
 		vim.api.nvim_buf_delete(bufnr, {})
 		db.required["core.dirman"].set_workspace(curr_wksp)
 		local links_entries = generate_links_entries(links, notes_entries)
 		db.notes:insert(process_notes_for_db_sync(notes_entries))
 		db.links:insert(links_entries)
-		vim.notify("Neorg-roam: regenerated db file.", vim.log.levels.INFO)
+		vim.notify("Neorg-roam: synced workspace " .. wksp_name .. ".", vim.log.levels.INFO)
 	end,
 
-	sync_wksp = function(wksp)
-		local results = {}
+	get_notes = function(wksp)
+		-- should you even bother doing anything here or just use dirman?
+	end,
+
+	get_backlinks_from_id = function(id)
+		local backlinks = {}
 		db.sql:with_open(function()
-			results =
-				db.sql:eval("select * from notes join links on notes.id = links.source where notes.workspace = ?", wksp)
+			local r = db.sql:eval(
+				[[
+					select path, title
+					from links join notes
+					on liks.source = notes.id
+					where links.target = ?
+				]],
+				id
+			)
+			for _, value in ipairs(r) do
+				table.insert(backlinks, { path = unescape(value.path), title = unescape(value.title) })
+			end
 		end)
-		vim.print(results)
+		return backlinks
 	end,
-
-	get_notes = function(wksp) end,
-
-	get_backlinks = function(id) end,
+	get_backlinks = function(bufnr)
+		local id = db.required["core.integrations.roam.treesitter"].get_document_metadata(bufnr)
+	end,
 
 	insert_note = function(note_data) end,
 
