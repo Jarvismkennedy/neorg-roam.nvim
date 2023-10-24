@@ -33,6 +33,7 @@ module.load = function()
     local keybinds = module.required["core.keybinds"]
     keybinds.register_keybinds(module.name, {
         "insert_link",
+		"get_backlinks"
     })
 
     -- define the keybindings
@@ -41,6 +42,7 @@ module.load = function()
         keybnds.map_event_to_mode("norg", {
             n = {
                 { module.config.public.keymaps.insert_link, "core.integrations.roam.insert_link" },
+				{ module.config.public.keymaps.get_backlinks, "core.integrations.roam.get_backlinks" }
             },
         }, { silent = true, noremap = true })
     end)
@@ -48,6 +50,7 @@ end
 module.config.public = {
     keymaps = {
         select_prompt = "<C-n>",
+		get_backlinks = "<leader>nb",
         insert_link = "<leader>ni",
         find_note = "<leader>nf",
         capture_note = "<leader>nc",
@@ -56,6 +59,7 @@ module.config.public = {
         capture_save = "<C-w>",
 		db_sync = "<leader>nsd",
 		db_sync_wksp = "<leader>nsw",
+
     },
     capture_templates = {
         {
@@ -129,6 +133,7 @@ module.config.private = {
 module.on_event = function(event)
     local event_handlers = {
         ["core.integrations.roam.insert_link"] = module.public.insert_link,
+        ["core.integrations.roam.get_backlinks"] = module.public.get_backlinks,
     }
     if event.split_type[1] == "core.keybinds" then
         local handler = event_handlers[event.split_type[2]]
@@ -144,6 +149,7 @@ end
 module.events.subscribed = {
     ["core.keybinds"] = {
         ["core.integrations.roam.insert_link"] = true,
+        ["core.integrations.roam.get_backlinks"] = true,
     },
 }
 
@@ -194,7 +200,9 @@ module.public = {
         local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.insert_link)
         picker:find()
     end,
-    get_back_links = function() end,
+    get_backlinks = function() 
+		vim.print(module.required["core.integrations.roam.db"].get_backlinks(0))
+	end,
     db_sync = function()
 		module.required["core.integrations.roam.db"].sync()
 	end,

@@ -10,7 +10,7 @@ local unescape = function(content)
 	return content:gsub("^__ESCAPED__'(.*)'$", "%1")
 end
 local link_exists = function(from, to, t)
-	for index, value in ipairs(t) do
+	for _, value in ipairs(t) do
 		if value.source == from and value.target == to then
 			return true
 		end
@@ -37,7 +37,7 @@ local function starts_with(str, start)
 end
 local function generate_links_entries(links, notes_entries)
 	local entries = {}
-	for i, link in ipairs(links) do
+	for _, link in ipairs(links) do
 		local from_note = notes_entries[link.from]
 		local to_note = notes_entries[link.to]
 		if from_note == nil or to_note == nil or link_exists(from_note.id, to_note.id, entries) then
@@ -53,7 +53,7 @@ local function get_or_generate_metadata(bufnr)
 	local metadata = db.required["core.integrations.roam.meta"].get_document_metadata(bufnr)
 	if metadata == nil or metadata.id == nil then
 		if metadata ~= nil then
-			setmetatable(metadata,{__is_obj = true})
+			setmetatable(metadata, { __is_obj = true })
 		end
 		metadata = db.required["core.integrations.roam.meta"].inject_metadata(bufnr, true, metadata)
 		vim.api.nvim_buf_call(bufnr, function()
@@ -224,19 +224,27 @@ db.public = {
 				[[
 					select path, title
 					from links join notes
-					on liks.source = notes.id
+					on links.source = notes.id
 					where links.target = ?
 				]],
 				id
 			)
-			for _, value in ipairs(r) do
-				table.insert(backlinks, { path = unescape(value.path), title = unescape(value.title) })
+			if r == true or r == false then
+				r = {}
+			else
+				for _, value in ipairs(r) do
+					table.insert(backlinks, { path = unescape(value.path), title = unescape(value.title) })
+				end
 			end
 		end)
 		return backlinks
 	end,
 	get_backlinks = function(bufnr)
-		local id = db.required["core.integrations.roam.treesitter"].get_document_metadata(bufnr)
+		local id = db.required["core.integrations.roam.treesitter"].get_document_metadata(bufnr).id
+		if id == nil then
+			error("Norg document does not have an id. Please run db_sync.")
+		end
+		return db.public.get_backlinks_from_id(id)
 	end,
 
 	insert_note = function(note_data) end,

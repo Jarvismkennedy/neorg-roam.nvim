@@ -89,16 +89,14 @@ meta.private = {
 		local lines = { "@document.meta" }
 		local t = {}
 		for i, v in ipairs(template) do
-			if type(v[2]) == "string" then
-				local val = v[2]
-				table.insert(lines, string.format("%s: %s", v[1], val))
-				t[v[1]] = val
-			elseif type(v[2]) == "function" then
+			if type(v[2]) == "function" then
 				local val = v[2](buf)
 				table.insert(lines, string.format("%s: %s", v[1], val))
 				t[v[1]] = val
 			else
-				error("neorg roam meta template must be function, found " .. type(v[2]) .. " at index " .. i)
+				local val = v[2]
+				table.insert(lines, string.format("%s: %s", v[1], val))
+				t[v[1]] = val
 			end
 		end
 		table.insert(lines, "@end")
