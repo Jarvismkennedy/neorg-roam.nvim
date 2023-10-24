@@ -105,15 +105,6 @@ meta.private = {
 	insert_metadata = function(buf, lines, start_row, end_row) end,
 }
 meta.public = {
-
-	update_or_inject_metadata = function(buf)
-		local metadata_present = meta.required["core.esupports.metagen"].is_metadata_present(buf)
-		if metadata_present then
-			vim.cmd("Neorg update-metadata")
-		else
-			meta.inject_metadata(buf)
-		end
-	end,
 	inject_metadata = function(buf, force, template)
 		local present, user_data = meta.required["core.esupports.metagen"].is_metadata_present(buf)
 		if not present or force then

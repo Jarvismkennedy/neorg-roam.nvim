@@ -96,7 +96,7 @@ module.config.private = {
         else
             vim.cmd("e " .. file_path)
             local buf = vim.api.nvim_get_current_buf()
-			module.required["core.integrations.roam.meta"].update_or_inject_metadata(buf)
+			module.required["core.integrations.roam.meta"].inject_metadata(buf)
         end
     end,
     capture_note = function(prompt, selection)
