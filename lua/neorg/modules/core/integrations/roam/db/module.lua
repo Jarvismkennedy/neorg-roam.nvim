@@ -212,6 +212,9 @@ db.public = {
 		db.links:insert(links_entries)
 		vim.notify("Neorg-roam: synced workspace " .. wksp_name .. ".", vim.log.levels.INFO)
 	end,
+	sync_file = function(bufnr)
+		
+	end,
 
 	get_notes = function(wksp)
 		-- should you even bother doing anything here or just use dirman?
@@ -246,6 +249,7 @@ db.public = {
 		end
 		return db.public.get_backlinks_from_id(id)
 	end,
+
 
 	insert_note = function(note_data) end,
 
