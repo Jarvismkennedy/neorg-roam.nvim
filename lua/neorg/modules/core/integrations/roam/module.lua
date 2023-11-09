@@ -19,9 +19,12 @@ module.neorg_post_load = function()
     -- set the keybind for pulling up telescope
     vim.keymap.set('n', module.config.public.keymaps.find_note, module.public.find_note)
     vim.keymap.set('n', module.config.public.keymaps.capture_note, module.public.capture_note)
-    vim.keymap.set('n', module.config.public.keymaps.capture_index, module.public.capture_index)
+
     vim.keymap.set('n', module.config.public.keymaps.db_sync, module.public.db_sync)
     vim.keymap.set('n', module.config.public.keymaps.db_sync_wksp, module.public.db_sync_wksp)
+    if module.config.public.workspaces == nil then
+        error '[neorg-roam] Must include roam workspaces in neorg roam config.'
+    end
 end
 module.load = function()
     -- pass config to capture module.
@@ -44,20 +47,18 @@ module.load = function()
             },
         }, { silent = true, noremap = true })
     end)
-    if module.config.public.workspaces == nil then
-        error '[neorg-roam] Must include roam workspaces in neorg roam config.'
-    end
+
     -- keep track of which workspaces are roam workspaces.
     module.config.private.wrksps = {}
     for i, v in ipairs(module.config.public.workspaces) do
         if type(v) ~= 'string' then
             return error('[neorg-roam] Invalid entry in workspaces config at index: ' .. i)
         end
-        local wksp = module.required['dirman'].get_workspace(v)
+        local wksp = module.required['core.dirman'].get_workspace(v)
         if wksp == nil then
             return error '[neorg-roam] Workspaces must be defined in the core.dirman module as well as the neorg-roam module'
         end
-        table.insert(module.config.private.wrksps, wksp)
+        table.insert(module.config.private.wrksps, v)
     end
     module.config.private.curr_wrksp = module.config.private.wrksps[1]
 end
@@ -104,9 +105,11 @@ module.config.private = {
         else
             choice = selection.display
         end
-        local file_path = module.required['core.dirman'].get_current_workspace()[2] .. '/' .. choice .. '.norg'
+
+        local wksp_path = module.required['core.dirman'].get_workspace(module.config.private.curr_wrksp)
+        local file_path = wksp_path .. '/' .. choice .. '.norg'
         if vim.fn.filereadable(file_path) == 0 then
-            module.required['core.integrations.roam.capture'].capture_note(choice)
+            module.required['core.integrations.roam.capture'].capture_note(choice, wksp_path)
         else
             vim.cmd('e ' .. file_path)
             local buf = vim.api.nvim_get_current_buf()
@@ -123,7 +126,8 @@ module.config.private = {
         else
             title = selection.display
         end
-        module.required['core.integrations.roam.capture'].capture_note(title)
+        local wksp_path = module.required['core.dirman'].get_workspace(module.config.private.curr_wrksp)
+        module.required['core.integrations.roam.capture'].capture_note(title, wksp_path)
     end,
     insert_link = function(prompt, selection)
         local file = nil
@@ -134,10 +138,10 @@ module.config.private = {
             return
         end
         if file == nil then
-            local title = prompt
-            module.required['core.integrations.roam.capture'].capture_link(title)
+            local workspace_path = module.required['core.dirman'].get_workspace(module.config.private.curr_wrksp)
+            module.required['core.integrations.roam.capture'].capture_link(prompt, workspace_path)
         else
-            local link = '{:' .. file .. ':}[' .. file .. ']'
+            local link = '{:$'.. module.config.private.curr_wrksp .."/".. file .. ':}[' .. file .. ']'
             vim.api.nvim_put({ link }, 'c', true, true)
         end
     end,
@@ -179,8 +183,9 @@ module.private = {
         if curr_wksp == nil then
             error '[neorg-roam] current workspace is nil'
         end
-        local files = dirman.get_norg_files(curr_wksp[1])
-        return { curr_wksp, files }
+        local files = dirman.get_norg_files(curr_wksp)
+        local wksp = dirman.get_workspace(curr_wksp)
+        return { wksp, files }
     end,
 }
 module.public = {
@@ -193,6 +198,7 @@ module.public = {
     find_note = function()
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
+        vim.print(curr_wksp)
         local files = wksp_files[2]
         local title = 'Find note - ' .. module.config.public.keymaps.select_prompt .. ' to select new note'
         local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.find_note)
@@ -230,8 +236,8 @@ module.public = {
         module.required['core.integrations.roam.db'].sync()
     end,
     db_sync_wksp = function()
-        local wkspaces = module.required['core.dirman'].get_workspace_names()
-        local wksp = vim.ui.select(wkspaces, { prompt = 'Sync Workspace: ' }, function(choice)
+        local wkspaces = module.public.get_workspaces()
+        vim.ui.select(wkspaces, { prompt = 'Sync Workspace: ' }, function(choice)
             module.required['core.integrations.roam.db'].sync_wksp(choice)
         end)
     end,

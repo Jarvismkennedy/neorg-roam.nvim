@@ -70,7 +70,7 @@ M.generate_picker = function(files, curr_wksp, title, action)
     local theme_name = require("neorg.modules.core.integrations.roam.module").config.public.theme
     local opts = require("telescope.themes")["get_" .. theme_name]({})
 
-    local start_index = #curr_wksp[2] + 2
+    local start_index = #curr_wksp + 2
     local entries = {}
     for i, v in ipairs(files) do
         table.insert(entries, { v, v:sub(start_index, -6) })

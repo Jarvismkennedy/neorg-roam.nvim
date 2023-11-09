@@ -2,13 +2,13 @@
 title: README
 id: e72fa900-13f8-404e-ad26-92651e586cd1
 created: 2023-10-05T09:48:53-0500
-updated: 2023-10-05T09:48:53-0500
+updated: 2023-11-01T15:53:08-0500
 @end
 * Neorg Roam
   Like org-roam. But for Neorg. 
 
 ** Install
-   Install with your plugin manager. Here is an example with packer.
+   Install with your plugin manager of choice. Here is an example with packer.
    @code lua 
    use({"jarvismkennedy/neorg-roam.nvim", 
 	   requires = { 
@@ -97,6 +97,7 @@ updated: 2023-10-05T09:48:53-0500
 	- ( ) Currently capture templates always insert after the metadata. Support a target property to
 	   insert after any tree-sitter node.
 	- ( ) Support the `narrowed` flag to capture in a blank buffer and write lines to file on save.
+	- ( ) Keybinds for capture template vs capture default
 
 ** currently implemented features
    - Find notes.
@@ -106,11 +107,10 @@ updated: 2023-10-05T09:48:53-0500
    - Capture templates
 
 ** TODO:
-   - Create sql module.
    - Implement back links.
-   - Other types of linkables.
    - Write tests.
    - Insert links is broken when inserting link to a file in a different root directory.
-   - Moving files around / renaming them should not break links.
+   - Moving files around / renaming them should not break links - implement a "fix links" function
+	 that uses the documents id to update the sql entries.
 
 
