@@ -195,7 +195,7 @@ module.public = {
     set_config = function(config)
         module.config.public = config
     end,
-    capture_note = function(title)
+    capture_note = function(title, workspace_path)
         local callback = function(template)
             local buf_win = utils.create_capture_window()
             local buf = buf_win[1]
@@ -203,7 +203,7 @@ module.public = {
                 -- edit the choice in the capture window, update/inject metadata, jump to bottom
                 -- of file, and enter a new line.
 
-                local file = module.required["core.dirman"].get_current_workspace()[2] .. "/"
+				local file = workspace_path
                 local file_exists = vim.fn.filereadable(file .. title .. ".norg") == 1
                 if file_exists then
                     file = file .. title .. ".norg"
@@ -254,10 +254,10 @@ module.public = {
         local pos = vim.api.nvim_win_get_cursor(win)
         -- save the buffer and cursor position to insert link on save
         module.private.capture_link_buffer = { id = buf, row = pos[1], col = pos[2] }
-        local callback = function(template)
+        local callback = function(template, workspace_path)
             local buf_win = utils.create_capture_window()
             vim.api.nvim_buf_call(buf_win[1], function()
-                local file = module.required["core.dirman"].get_current_workspace()[2] .. "/"
+                local file = workspace_path .. "/"
                 local file_exists = vim.fn.filereadable(file .. title .. ".norg") == 1
                 local norg_link = ""
                 if file_exists then

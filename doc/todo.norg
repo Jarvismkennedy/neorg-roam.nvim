@@ -2,7 +2,7 @@
 title: todo
 id: 3fd8ebf6-ac2a-4c06-b4ce-030729974216
 created: 2023-10-05T10:02:20-0500
-updated: 2023-10-06T11:15:50-0500
+updated: 2023-11-08T14:37:20-0500
 @end
 * To Dos
   - (x) Separate capture logic into its on module.
@@ -53,7 +53,6 @@ updated: 2023-10-06T11:15:50-0500
    - How should we update links if filename/location changes? I think just run a command from the
 	 file which was changed to search for backlinks using uuid, then use treesitter to update the
 	 link path in those files.
-   - Need to db-sync to generate the db from files. Take a look at org-roam to see how they implement db-syncing.
 
 * Capture templates
   - Improvements to capture templates.
