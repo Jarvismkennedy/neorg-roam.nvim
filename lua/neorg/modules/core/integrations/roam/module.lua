@@ -9,45 +9,20 @@ module.setup = function()
         requires = {
             'core.keybinds',
             'core.dirman',
+            'core.neorgcmd',
             'core.integrations.roam.meta',
             'core.integrations.roam.capture',
             'core.integrations.roam.db',
         },
     }
 end
-module.neorg_post_load = function()
-    -- set the keybind for pulling up telescope
-    vim.keymap.set('n', module.config.public.keymaps.find_note, module.public.find_note)
-    vim.keymap.set('n', module.config.public.keymaps.capture_note, module.public.capture_note)
 
-    vim.keymap.set('n', module.config.public.keymaps.db_sync, module.public.db_sync)
-    vim.keymap.set('n', module.config.public.keymaps.db_sync_wksp, module.public.db_sync_wksp)
-    if module.config.public.workspaces == nil then
-        error '[neorg-roam] Must include roam workspaces in neorg roam config.'
-    end
-end
 module.load = function()
     -- pass config to capture module.
     module.required['core.integrations.roam.capture'].set_config(module.config.public)
-
-    -- register keybinds
-    local keybinds = module.required['core.keybinds']
-    keybinds.register_keybinds(module.name, {
-        'insert_link',
-        'get_backlinks',
-    })
-
-    -- define the keybindings
-    local neorg_callbacks = require 'neorg.core.callbacks'
-    neorg_callbacks.on_event('core.keybinds.events.enable_keybinds', function(_, keybnds)
-        keybnds.map_event_to_mode('norg', {
-            n = {
-                { module.config.public.keymaps.insert_link, 'core.integrations.roam.insert_link' },
-                { module.config.public.keymaps.get_backlinks, 'core.integrations.roam.get_backlinks' },
-            },
-        }, { silent = true, noremap = true })
-    end)
-
+    if module.config.public.workspaces == nil then
+        error '[neorg-roam] Must include roam workspaces in neorg roam config.'
+    end
     -- keep track of which workspaces are roam workspaces.
     module.config.private.wrksps = {}
     for i, v in ipairs(module.config.public.workspaces) do
@@ -61,6 +36,45 @@ module.load = function()
         table.insert(module.config.private.wrksps, v)
     end
     module.config.private.curr_wrksp = module.config.private.wrksps[1]
+
+    -- setup neorg commands
+    neorg.modules.await('core.neorgcmd', function(neorgcmd)
+        neorgcmd.add_commands_from_table {
+            roam = {
+                args = 1,
+                subcommands = {
+                    ['sync-db'] = {
+                        args = 0,
+                        name = 'core.integrations.roam.sync_db',
+                    },
+                    ['sync-workspace'] = {
+                        max_args = 1,
+                        name = 'core.integrations.roam.sync_wksp',
+                    },
+                    ['sync-current-file'] = {
+                        condition = 'norg',
+                        args = 0,
+                        name = 'core.integrations.roam.sync_current_file',
+                    },
+                    ['get-backlinks'] = {
+                        condition = 'norg',
+                        args = 0,
+                        name = 'core.integrations.roam.get_backlinks',
+                    },
+                    ['get-files'] = {
+                        args = 0,
+                        name = 'core.integrations.roam.get_files',
+                    },
+                    ['insert-link'] = {
+                        condition = 'norg',
+                        args = 0,
+                        name = 'core.integrations.roam.insert_link',
+                    },
+                    ['capture'] = { max_args = 1, name = 'core.integrations.roam.capture' },
+                },
+            },
+        }
+    end)
 end
 module.config.public = {
     keymaps = {
@@ -141,7 +155,7 @@ module.config.private = {
             local workspace_path = module.required['core.dirman'].get_workspace(module.config.private.curr_wrksp)
             module.required['core.integrations.roam.capture'].capture_link(prompt, workspace_path)
         else
-            local link = '{:$'.. module.config.private.curr_wrksp .."/".. file .. ':}[' .. file .. ']'
+            local link = '{:$' .. module.config.private.curr_wrksp .. '/' .. file .. ':}[' .. file .. ']'
             vim.api.nvim_put({ link }, 'c', true, true)
         end
     end,
@@ -150,14 +164,23 @@ module.config.private = {
 
 -- handle events.
 module.on_event = function(event)
+    local up = unpack
+    if table.unpack then
+        up = table.unpack
+    end
     local event_handlers = {
         ['core.integrations.roam.insert_link'] = module.public.insert_link,
         ['core.integrations.roam.get_backlinks'] = module.public.get_backlinks,
+        ['core.integrations.roam.sync_db'] = module.public.db_sync,
+        ['core.integrations.roam.sync_wksp'] = module.public.db_sync_wksp,
+        ['core.integrations.roam.sync_current_file'] = module.public.db_sync_file,
+        ['core.integrations.roam.get_files'] = module.public.find_note,
+        ['core.integrations.roam.capture'] = module.public.capture_note,
     }
-    if event.split_type[1] == 'core.keybinds' then
+    if event.split_type[1] == 'core.neorgcmd' then
         local handler = event_handlers[event.split_type[2]]
         if handler then
-            handler()
+            handler(up(event.content))
         else
             error('No handler defined for ' .. event.split_type[2])
         end
@@ -166,9 +189,14 @@ end
 
 -- subscribe to events
 module.events.subscribed = {
-    ['core.keybinds'] = {
+    ['core.neorgcmd'] = {
+        ['core.integrations.roam.sync_db'] = true,
+        ['core.integrations.roam.sync_wksp'] = true,
+        ['core.integrations.roam.sync_file'] = true,
         ['core.integrations.roam.insert_link'] = true,
         ['core.integrations.roam.get_backlinks'] = true,
+        ['core.integrations.roam.get_files'] = true,
+        ['core.integrations.roam.capture'] = true,
     },
 }
 
@@ -198,7 +226,6 @@ module.public = {
     find_note = function()
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
-        vim.print(curr_wksp)
         local files = wksp_files[2]
         local title = 'Find note - ' .. module.config.public.keymaps.select_prompt .. ' to select new note'
         local picker = utils.generate_picker(files, curr_wksp, title, module.config.private.find_note)
@@ -207,7 +234,10 @@ module.public = {
         end
         picker:find()
     end,
-    capture_note = function()
+    capture_note = function(args)
+        if args ~= nil then
+            return module.public.capture_to_file()
+        end
         local wksp_files = module.private.get_files()
         local curr_wksp = wksp_files[1]
         local files = wksp_files[2]
@@ -241,6 +271,7 @@ module.public = {
             module.required['core.integrations.roam.db'].sync_wksp(choice)
         end)
     end,
+    db_sync_file = function() end,
 }
 
 return module
