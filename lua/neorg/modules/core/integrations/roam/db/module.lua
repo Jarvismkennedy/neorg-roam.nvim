@@ -48,14 +48,15 @@ local function generate_links_entries(links, notes_entries)
     end
     return entries
 end
-local function get_or_generate_metadata(bufnr)
+local function get_or_generate_metadata(bufnr, force)
     vim.api.nvim_buf_call(bufnr, vim.cmd.edit)
     local metadata = db.required['core.integrations.roam.meta'].get_document_metadata(bufnr)
-    if metadata == nil or metadata.id == nil then
+    if metadata == nil or metadata.id == nil or force then
         if metadata ~= nil then
             setmetatable(metadata, { __is_obj = true })
         end
         metadata = db.required['core.integrations.roam.meta'].inject_metadata(bufnr, true, metadata)
+		vim.print(metadata)
         vim.api.nvim_buf_call(bufnr, function()
             vim.cmd [[write]]
         end)
@@ -161,7 +162,7 @@ db.public = {
             for _, file in ipairs(wksp_files) do
                 local bufnr = vim.api.nvim_create_buf(true, false)
                 vim.api.nvim_buf_set_name(bufnr, file)
-                local metadata = get_or_generate_metadata(bufnr)
+                local metadata = get_or_generate_metadata(bufnr, true)
                 notes_entries[file] = { path = file, id = metadata.id, workspace = wksp_name, title = metadata.title }
                 local nodes = db.required['core.integrations.roam.treesitter'].get_norg_links(bufnr)
                 vim.api.nvim_buf_delete(bufnr, {})
