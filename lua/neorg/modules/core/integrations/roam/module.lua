@@ -21,7 +21,11 @@ module.load = function()
     -- pass config to capture module.
     module.required['core.integrations.roam.capture'].set_config(module.config.public)
     if module.config.public.workspaces == nil then
-        error '[neorg-roam] Must include roam workspaces in neorg roam config.'
+        module.config.public.workspaces = module.required['core.dirman'].get_workspace_names()
+        module.config.private.curr_wrksp = module.required['core.dirman'].get_current_workspace()[1]
+        vim.print(module.config.public.workspaces)
+    else
+        module.config.private.curr_wrksp = module.config.public.workspaces[1]
     end
     -- keep track of which workspaces are roam workspaces.
     module.config.private.wrksps = {}
@@ -35,8 +39,6 @@ module.load = function()
         end
         table.insert(module.config.private.wrksps, v)
     end
-    module.config.private.curr_wrksp = module.config.private.wrksps[1]
-
     -- setup neorg commands
     neorg.modules.await('core.neorgcmd', function(neorgcmd)
         neorgcmd.add_commands_from_table {
@@ -51,17 +53,21 @@ module.load = function()
                         max_args = 1,
                         name = 'core.integrations.roam.sync_wksp',
                     },
+                    ['set-workspace'] = {
+                        max_args = 1,
+                        name = 'core.integrations.roam.set_wksp',
+                    },
                     ['sync-current-file'] = {
                         condition = 'norg',
                         args = 0,
                         name = 'core.integrations.roam.sync_current_file',
                     },
-                    ['get-backlinks'] = {
+                    ['find-backlinks'] = {
                         condition = 'norg',
                         args = 0,
                         name = 'core.integrations.roam.get_backlinks',
                     },
-                    ['get-files'] = {
+                    ['find-files'] = {
                         args = 0,
                         name = 'core.integrations.roam.get_files',
                     },
@@ -78,16 +84,9 @@ module.load = function()
 end
 module.config.public = {
     keymaps = {
-        select_prompt = '<C-n>',
-        get_backlinks = '<leader>nb',
-        insert_link = '<leader>ni',
-        find_note = '<leader>nf',
-        capture_note = '<leader>nc',
-        capture_index = '<leader>nci',
+        select_prompt = '<C-Space>',
         capture_cancel = '<C-q>',
         capture_save = '<C-w>',
-        db_sync = '<leader>nsd',
-        db_sync_wksp = '<leader>nsw',
     },
     capture_templates = {
         {
@@ -173,6 +172,7 @@ module.on_event = function(event)
         ['core.integrations.roam.get_backlinks'] = module.public.get_backlinks,
         ['core.integrations.roam.sync_db'] = module.public.db_sync,
         ['core.integrations.roam.sync_wksp'] = module.public.db_sync_wksp,
+        ['core.integrations.roam.set_wksp'] = module.public.change_workspace,
         ['core.integrations.roam.sync_current_file'] = module.public.db_sync_file,
         ['core.integrations.roam.get_files'] = module.public.find_note,
         ['core.integrations.roam.capture'] = module.public.capture_note,
@@ -192,6 +192,7 @@ module.events.subscribed = {
     ['core.neorgcmd'] = {
         ['core.integrations.roam.sync_db'] = true,
         ['core.integrations.roam.sync_wksp'] = true,
+        ['core.integrations.roam.set_wksp'] = true,
         ['core.integrations.roam.sync_file'] = true,
         ['core.integrations.roam.insert_link'] = true,
         ['core.integrations.roam.get_backlinks'] = true,
@@ -222,6 +223,26 @@ module.public = {
     end,
     get_current_workspace = function()
         return module.config.private.curr_wrksp
+    end,
+    set_workspace = function(wksp)
+        for _, v in ipairs(module.config.private.wrksps) do
+            if wksp == v then
+                module.config.private.curr_wrksp = wksp
+                return true
+            end
+        end
+        vim.notify('[neorg-roam] workspace ' .. wksp .. ' is not a roam workspace')
+    end,
+    change_workspace = function(args)
+		vim.print('test')
+		vim.print(args)
+        if args ~= nil then
+            module.public.set_workspace(args)
+        end
+        local wkspaces = module.public.get_workspaces()
+        vim.ui.select(wkspaces, { prompt = 'Change Workspace > ' }, function(choice)
+            module.public.set_workspace(choice)
+        end)
     end,
     find_note = function()
         local wksp_files = module.private.get_files()

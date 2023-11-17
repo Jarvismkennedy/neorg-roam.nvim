@@ -47,12 +47,10 @@ local join_templates = function(t1, t2)
     end
     for i, v in ipairs(t2) do
         local key = v[1]
-        vim.print(key, t1_map[key])
         if t1_map[key] == nil then
             table.insert(merged, v)
         end
     end
-    vim.print(merged)
     return merged
 end
 meta.setup = function()
@@ -62,6 +60,7 @@ meta.setup = function()
             'core.integrations.roam.treesitter',
             'core.integrations.roam',
             'core.esupports.metagen',
+			'core.dirman',
         },
     }
 end
@@ -82,8 +81,12 @@ meta.config.private = {
         { 'id', generate_uuid },
         {
             'workspace',
-            function()
-                return meta.required['core.integrations.roam'].get_current_workspace()
+            function(buf)
+                local wksp = ''
+                vim.api.nvim_buf_call(buf, function()
+                    wksp = meta.required['core.dirman'].get_workspace_match()
+                end)
+                return wksp
             end,
         },
         { 'created', get_timestamp },
@@ -92,7 +95,6 @@ meta.config.private = {
 }
 meta.private = {
     create_metadata = function(buf, template)
-        vim.print(template)
         local lines = { '@document.meta' }
         local t = {}
         for i, v in ipairs(template) do

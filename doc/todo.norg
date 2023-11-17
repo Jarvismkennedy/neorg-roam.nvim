@@ -1,61 +1,35 @@
 @document.meta
 title: todo
-id: 3fd8ebf6-ac2a-4c06-b4ce-030729974216
-created: 2023-10-05T10:02:20-0500
-updated: 2023-11-08T14:37:20-0500
+id: f5a13416-3fe8-4a44-8184-133f8f236895
+workspace: default
+created: 2023-11-16T21:38:43-0500
+updated: 2023-11-16T21:38:43-0500
 @end
-* To Dos
-  - (x) Separate capture logic into its on module.
-  - ( ) Write test cases for all functions so that you know when you mess something up.
-  - (x) Refactor the picker logic. 
-  - (x) Capture templates
-  - ( ) SQL module 
-  - ( ) Back links (super important)
-  - ( ) Tags ?
-  - ( ) Other types of linkables.
 
 
-* Metadata 
-  - inject / update metadata
-  - capture templates metadata template
-  - change templates to ipairs instead of pairs for guaranteed ordering.
-
-* Links
-  - Links should include workspace like `{:$personal/index:}[personal index]` so that linking to
-	other workspaces works properly
-  - How can we make renaming files not break links? I guess just from the renamed file run neorg-roam update
-	links... but you shouldnt need to do this.
-* SQLite
-** To do 
-   - sync workspace
-   - backlinks
-   - get notes
-   - update links on title / file path change
-   - generate indexes
-   - only generate one link for each to-from file pair.
-
-** Schemas
-*** Notes table
-	@table
-	| id            | filepath (for opening files) | workspacepath (for inserting links) | title           |
-	| ------------- | ----------------             | -----------------                   | --              |
-	| int not null  | string not null              | string not null                     | string not null |
-	@end
-
-*** Back Links 
-	@table
-	| source_id      | target_id      | href                                    | lin                |
-	| ---            | ---            | --------                                | ---                |
-	| FK to notes.Id | FK to notes.Id | string  e.g. `{:$wrkspc/path/to/link:}` | `{:path/to/link:}` |
-	@end
-
-** thoughts
-   - How should we update links if filename/location changes? I think just run a command from the
-	 file which was changed to search for backlinks using uuid, then use treesitter to update the
-	 link path in those files.
-
-* Capture templates
-  - Improvements to capture templates.
-  - Add metadata template to capture templates.
-  - Insert after any tree sitter node. - Then make a capture template example which will let you
-	choose which heading to insert after.
+* Rewrite
+  Youve learned a bunch from implementing this once, now you should rewrite it to make the code
+  better.
+  - use the core modules as much as possible to stop re creating functionality.
+** Modules
+*** Roam
+	- handles config
+	- Exposes all the apis
+	- defines commands
+	- autocommands
+*** db
+	- handles interaction with db
+*** Find
+	- handles all the find commands
+*** UI
+	- handles creating all of the pickers.
+*** capture
+	- handles all the capture logic and insert links
+*** treesitter
+	- for parsing the files
+*** meta
+	- helps with metadata insert / create
+***  utils
+	 - any other utils you might need.
+	 - like substitutions
+*** Anything else?

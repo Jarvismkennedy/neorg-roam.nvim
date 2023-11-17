@@ -1,6 +1,7 @@
 local sqlite = require 'sqlite'
 local neorg = require 'neorg.core'
 local db = neorg.modules.create 'core.integrations.roam.db'
+
 -- Hacky workaround because sqlite.lua doesn't escape everything correctly, so it passes strings
 -- with () as functions
 local escape = function(content)
@@ -55,10 +56,9 @@ local function get_or_generate_metadata(bufnr, force)
         if metadata ~= nil then
             setmetatable(metadata, { __is_obj = true })
         end
-        metadata = db.required['core.integrations.roam.meta'].inject_metadata(bufnr, true, metadata)
-		vim.print(metadata)
+        metadata = db.required['core.integrations.roam.meta'].inject_metadata(bufnr, true)
         vim.api.nvim_buf_call(bufnr, function()
-            vim.cmd [[write]]
+            vim.cmd [[silent write]]
         end)
     end
     return metadata
@@ -70,7 +70,7 @@ db.setup = function()
         requires = {
             'core.dirman',
             'core.dirman.utils',
-			'core.integrations.roam',
+            'core.integrations.roam',
             'core.integrations.roam.treesitter',
             'core.integrations.roam.meta',
         },
@@ -81,13 +81,13 @@ db.config.private = {
 }
 db.private = {
     init = function()
-        db.notes = sqlite.tbl('notes', {
+        local notes = sqlite.tbl('notes', {
             id = { type = 'text', primary = true, required = true },
             path = { type = 'text', required = true, unique = true },
             workspace = { type = 'text', required = true },
             title = { type = 'text', required = true },
         })
-        db.links = sqlite.tbl('links', {
+        local links = sqlite.tbl('links', {
             id = true,
             source = {
                 reference = 'notes.id',
@@ -102,7 +102,11 @@ db.private = {
                 on_update = 'cascade',
             },
         })
-        db.sql = sqlite { uri = db.config.private.db_path, notes = db.notes, links = db.links }
+        db.sql = sqlite {
+            uri = db.config.private.db_path,
+            notes = notes,
+            links = links,
+        }
     end,
     clean_db_file = function()
         -- first close all open neorg buffers
@@ -130,6 +134,7 @@ db.private = {
             )
             return false
         end
+        vim.notify '[neorg-roam] db file cleaned'
         return true
     end,
     clean_wksp = function(wksp)
@@ -140,8 +145,8 @@ db.private = {
                 table.insert(ids, value.id)
             end
         end)
-        db.notes:remove { id = ids }
-        db.links:remove { source = ids }
+        db.sql.notes:remove { id = ids }
+        db.sql.links:remove { source = ids }
     end,
 }
 db.public = {
@@ -151,12 +156,11 @@ db.public = {
             return nil
         end
         -- start with roam workspace, add support for other workspaces later.
+        -- p
         local wkspaces = db.required['core.integrations.roam'].get_workspaces()
         local notes_entries = {}
         local links = {}
-        local curr_wksp = db.required['core.integrations.roam'].get_current_workspace()
         for _, wksp_name in ipairs(wkspaces) do
-            db.required['core.dirman'].set_workspace(wksp_name)
             local wksp = db.required['core.dirman'].get_workspace(wksp_name)
             local wksp_files = db.required['core.dirman'].get_norg_files(wksp_name)
             for _, file in ipairs(wksp_files) do
@@ -177,19 +181,21 @@ db.public = {
                 end
             end
         end
-        db.required['core.dirman'].set_workspace(curr_wksp)
         local links_entries = generate_links_entries(links, notes_entries)
-        db.notes:insert(process_notes_for_db_sync(notes_entries))
-        db.links:insert(links_entries)
+        if next(notes_entries) then
+            db.sql.notes:insert(process_notes_for_db_sync(notes_entries))
+        end
+        if #links_entries > 0 then
+            db.sql.links:insert(links_entries)
+        end
+
         vim.notify('Neorg-roam: synced db file.', vim.log.levels.INFO)
     end,
 
     sync_wksp = function(wksp_name)
         local notes_entries = {}
         local links = {}
-        local curr_wksp = db.required['core.integrations.roam'].get_current_workspace()
         db.private.clean_wksp(wksp_name)
-        db.required['core.dirman'].set_workspace(wksp_name)
         local wksp = db.required['core.dirman'].get_workspace(wksp_name)
         local wksp_files = db.required['core.dirman'].get_norg_files(wksp_name)
         for _, file in ipairs(wksp_files) do
@@ -209,17 +215,21 @@ db.public = {
                 table.insert(links, { from = file, to = expand })
             end
         end
-        db.required['core.dirman'].set_workspace(curr_wksp)
         local links_entries = generate_links_entries(links, notes_entries)
-        db.notes:insert(process_notes_for_db_sync(notes_entries))
-        db.links:insert(links_entries)
-        vim.notify('Neorg-roam: synced workspace ' .. wksp_name .. '.', vim.log.levels.INFO)
+        if next(notes_entries) then
+            db.sql.notes:insert(process_notes_for_db_sync(notes_entries))
+        end
+        if #links_entries > 0 then
+            db.sql.links:insert(links_entries)
+        end
+        vim.notify('[neorg-roam] synced workspace ' .. wksp_name .. '.', vim.log.levels.INFO)
     end,
     sync_file = function(bufnr)
         local metadata = get_or_generate_metadata(bufnr)
-        local note = db.notes:where { id = metadata.id }
-		-- the solution to this is to list the roam workspace names as part of the config, then do
-		-- an autocommand on norg files in the roam workspace to call sync_file.
+        local note = db.sql.notes:where { id = metadata.id }
+
+        -- the solution to this is to list the roam workspace names as part of the config, then do
+        -- an autocommand on norg files in the roam workspace to call sync_file.
         vim.print(note)
         -- local links = {}
         --           local nodes = db.required['core.integrations.roam.treesitter'].get_norg_links(bufnr)

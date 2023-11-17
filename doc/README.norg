@@ -1,73 +1,45 @@
 @document.meta
 title: README
-id: e72fa900-13f8-404e-ad26-92651e586cd1
-created: 2023-10-05T09:48:53-0500
-updated: 2023-11-01T15:53:08-0500
+id: 87e987fb-b753-4556-bb3c-d50ebdd15555
+workspace: default
+created: 2023-11-16T21:38:43-0500
+updated: 2023-11-16T21:38:43-0500
 @end
-* Neorg Roam
-  Like org-roam. But for Neorg. 
+config  = {
+keymaps = {
+-- select_prompt is used to to create new note / capture from the prompt directly
+-- instead of the telescope choice.
+   select_prompt = "<C-n>",
+   insert_link = "<leader>ni",
+   find_note = "<leader>nf",
+   capture_note = "<leader>nc",
+   capture_index = "<leader>nci",
+   capture_cancel = "<C-q>",
+   capture_save = "<C-w>",
+   },
+-- telescope theme
+   theme = "ivy",
 
-** Install
-   Install with your plugin manager of choice. Here is an example with packer.
-   @code lua 
-   use({"jarvismkennedy/neorg-roam.nvim", 
-	   requires = { 
-		   "nvim-telescope/telescope.nvim", 
-		   "nvim-lua/plenary.nvim"
-	   }
-   })
-   @end
-   And then set it up as a neorg module.
-   @code lua
-   require("neorg").setup({ 
-	   load = { 
-		   ["core.defaults"] = {},
-		   ["core.dirman"] = {
-			   config = { 
-				   workspaces = { 
-					   notes = "~/Documents/neorg/notes"
-					   roam = "~/Documents/neorg/roam"
-				   }
-				   default_workspace = "roam"
-			   }
-		   },
-		   ["core.integrations.roam"] = { 
-			   -- default keymaps
-			   config  = {
-				   keymaps = {
-					   -- select_prompt is used to to create new note / capture from the prompt directly
-					   -- instead of the telescope choice.
-					   select_prompt = "<C-n>",
-					   insert_link = "<leader>ni",
-					   find_note = "<leader>nf",
-					   capture_note = "<leader>nc",
-					   capture_index = "<leader>nci",
-					   capture_cancel = "<C-q>",
-					   capture_save = "<C-w>",
-				   },
-				   -- telescope theme
-				   theme = "ivy",
-
-				   capture_templates = {
-					   {
-						   name = "default",
-						   file =  "${title}",
-						   lines = { "" }, 
-					   }
-				   },
-				   substitutions = {
-					   title = function(metadata)
-						   return metadata.title
-					   end,
-					   date = function(metadata)
-						   return os.date("%Y-%m-%d")
-					   end
-				   }
-			   }
-		   }
-	   }
-   })
-   @end
+capture_templates = {
+{
+name = "default",
+file =  "${title}",
+lines = { "" }, 
+}
+},
+substitutions = {
+title = function(metadata)
+return metadata.title
+end,
+date = function(metadata)
+return os.date("%Y-%m-%d")
+end
+}
+}
+}
+}
+})
+@end
 
 ** Capture templates
    Capture templates are defined as a list in the roam config table.
