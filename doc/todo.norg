@@ -1,10 +1,24 @@
 @document.meta
 title: todo
-id: f5a13416-3fe8-4a44-8184-133f8f236895
+id: 334fe463-9f0a-4f53-9cc9-77da68039410
 workspace: default
-created: 2023-11-16T21:38:43-0500
-updated: 2023-11-16T21:38:43-0500
+created: 2023-11-16T21:59:10-0500
+updated: 2023-11-16T21:59:10-0500
 @end
+
+* Modules
+** Metadata
+   - ( ) capture templates metadata template
+** db
+   - ( ) fix changed filename and links based on ids
+   - ( ) sync file on save
+   - ( ) get back links ui
+   - ( ) get notes from db
+** Capture
+   - ( ) better capture templates
+   - ( ) insert after any node
+   - ( )
+
 
 
 * Rewrite
@@ -29,7 +43,7 @@ updated: 2023-11-16T21:38:43-0500
 	- for parsing the files
 *** meta
 	- helps with metadata insert / create
+
 ***  utils
 	 - any other utils you might need.
 	 - like substitutions
-*** Anything else?
