@@ -2,6 +2,18 @@ local sqlite = require 'sqlite'
 local neorg = require 'neorg.core'
 local db = neorg.modules.create 'core.integrations.roam.db'
 
+local function set(items, keyname)
+    local s = {}
+    for _, i in ipairs(items) do
+        if keyname == nil then
+            s[i] = true
+        else
+            s[i[keyname]] = true
+        end
+    end
+    return s
+end
+
 -- Hacky workaround because sqlite.lua doesn't escape everything correctly, so it passes strings
 -- with () as functions
 local escape = function(content)
@@ -224,24 +236,33 @@ db.public = {
         end
         vim.notify('[neorg-roam] synced workspace ' .. wksp_name .. '.', vim.log.levels.INFO)
     end,
+
+    -- [[
+    --  TODO:
+    --  - ( ) if note is not there, add it. Update the metadata fields if they are different.
+    --  - ( ) remove all links and update to the new links (better to only update the ones that need
+    --  to be updated
+    -- ]]
     sync_file = function(bufnr)
+		bufnr = bufnr or 0
+		vim.print("am i called??")
         local metadata = get_or_generate_metadata(bufnr)
         local note = db.sql.notes:where { id = metadata.id }
-
-        -- the solution to this is to list the roam workspace names as part of the config, then do
-        -- an autocommand on norg files in the roam workspace to call sync_file.
-        vim.print(note)
-        -- local links = {}
-        --           local nodes = db.required['core.integrations.roam.treesitter'].get_norg_links(bufnr)
-        --           for _, node in ipairs(nodes) do
-        --               local expand = ''
-        --               if starts_with(node, '$') then
-        --                   expand = db.required['core.dirman.utils'].expand_path(node)
-        --               else
-        --                   expand = wksp .. '/' .. node .. '.norg'
-        --               end
-        --               table.insert(links, { from = file, to = expand })
-        --           end
+        local links = {}
+        local nodes = db.required['core.integrations.roam.treesitter'].get_norg_links(bufnr)
+        for _, node in ipairs(nodes) do
+            local expand = ''
+            if starts_with(node, '$') then
+                expand = db.required['core.dirman.utils'].expand_path(node)
+            else
+                expand = note.workspace .. '/' .. node .. '.norg'
+            end
+            table.insert(links, expand)
+        end
+		vim.print(links)
+		vim.print(db.sql.links:get())
+        local db_links = db.sql.links:get { where = { source = note.path } }
+        vim.print(db_links)
     end,
 
     get_notes = function(wksp)

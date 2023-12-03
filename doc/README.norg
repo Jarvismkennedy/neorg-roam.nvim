@@ -1,12 +1,10 @@
 @document.meta
 title: README
-id: 4e0ac0c2-9990-497a-ad86-97d7f0a6bdc3
+id: 93c703a2-8564-4f3e-9452-45dc70ea5c33
 workspace: default
-created: 2023-11-16T21:59:10-0500
-updated: 2023-11-16T21:59:10-0500
+created: 2023-12-02T20:59:25-0500
+updated: 2023-12-02T20:59:25-0500
 @end
-keymaps = {
--- select_prompt is used to to create new note / capture from the prompt directly
 -- instead of the telescope choice.
    select_prompt = "<C-n>",
    insert_link = "<leader>ni",

@@ -1,12 +1,10 @@
 @document.meta
 title: todo
-id: 334fe463-9f0a-4f53-9cc9-77da68039410
+id: 5cb00449-df66-408f-8b5e-58fc6f776279
 workspace: default
-created: 2023-11-16T21:59:10-0500
-updated: 2023-11-16T21:59:10-0500
+created: 2023-12-02T20:59:25-0500
+updated: 2023-12-02T20:59:25-0500
 @end
-
-* Modules
 ** Metadata
    - ( ) capture templates metadata template
 ** db

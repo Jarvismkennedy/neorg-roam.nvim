@@ -193,7 +193,7 @@ module.events.subscribed = {
         ['core.integrations.roam.sync_db'] = true,
         ['core.integrations.roam.sync_wksp'] = true,
         ['core.integrations.roam.set_wksp'] = true,
-        ['core.integrations.roam.sync_file'] = true,
+        ['core.integrations.roam.sync_current_file'] = true,
         ['core.integrations.roam.insert_link'] = true,
         ['core.integrations.roam.get_backlinks'] = true,
         ['core.integrations.roam.get_files'] = true,
@@ -234,8 +234,8 @@ module.public = {
         vim.notify('[neorg-roam] workspace ' .. wksp .. ' is not a roam workspace')
     end,
     change_workspace = function(args)
-		vim.print('test')
-		vim.print(args)
+        vim.print 'test'
+        vim.print(args)
         if args ~= nil then
             module.public.set_workspace(args)
         end
@@ -292,7 +292,9 @@ module.public = {
             module.required['core.integrations.roam.db'].sync_wksp(choice)
         end)
     end,
-    db_sync_file = function() end,
+    db_sync_file = function()
+        module.required['core.integrations.roam.db'].sync_file()
+    end,
 }
 
 return module
