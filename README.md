@@ -1,13 +1,10 @@
-
+> :warning: I have stopped using Neorg for the time being and am no longer working on this project.
 
 
 
 # Neorg Roam
 
 Like org-roam. But for Neorg.
-
-## Warning
-This is very much a work in progress. I am building it in my spare time to learn more about neorgs module system and neovim in general, and to improve my note taking workflow. It will be completely re-written in the future with breaking changes.
 
 ## Install
 
