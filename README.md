@@ -1,4 +1,4 @@
-> :warning: I have stopped using Neorg for the time being and am no longer working on this project.
+:warning: I have stopped using Neorg for the time being and am no longer working on this project.
 
 
 
